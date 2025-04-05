@@ -1,10 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Poczekalnia</title>
 </head>
 <body>
+<h2>Poczekalnia</h2>
+
+<p>Gracze aktualnie w poczekalni:</p>
+<ul>
+    <li th:each="player : ${players}" th:text="${player}">Imię gracza</li>
+</ul>
+
+<form action="/farm/" method="get">
+    <button type="submit">Gotowy!</button>
+</form>
 
 </body>
 </html>

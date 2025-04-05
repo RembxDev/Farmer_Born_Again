@@ -1,10 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Super Farmer - Main Menu</title>
 </head>
 <body>
-    <h1>Main Menu</h1>
+<h1>Witaj w Super Farmer!</h1>
+
+<form action="/weiting" method="get">
+    <label for="playerName">Podaj nazwę gracza:</label>
+    <input type="text" id="playerName" name="playerName" required>
+    <button type="submit">Do poczekalni</button>
+</form>
+
 </body>
 </html>
