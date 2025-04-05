@@ -4,14 +4,17 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @AllArgsConstructor
-public class Index {
+@RequestMapping("/farm")
+public class GameController {
 
-    @GetMapping("/")
-    public String Play(Model model) {
+@GetMapping("/")
+    public String StartGame(Model model) {
 
-        return "menu/mainMenu";
-    }
+    return "farm/farm";
+}
+
 }
