@@ -1,5 +1,6 @@
 package org.jetbrains.rafal.farmer_born_again.Controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -28,29 +29,32 @@ public class MenuController {
     }
 
     @GetMapping("/waiting")
-    public String waiting(@RequestParam String playerName, HttpSession session, Model model) {
+    public String waiting(@RequestParam String playerName, HttpSession session, Model model, HttpServletRequest request) {
 
         String currentName = (String) session.getAttribute("playerName");
 
-        if (currentName == null && session.isNew()) {
-            return "redirect:/?error=loggedOut";
+        if (currentName == null) {
+            if (waitingPlayers.contains(playerName)) {
+                return "redirect:/?error=loggedOut";
+            }
+            session.setAttribute("playerName", playerName);
+            waitingPlayers.add(playerName);
+            currentName = playerName;
         }
 
-        if (currentName != null && currentName.equals(playerName)) {
-            model.addAttribute("playerName", playerName);
-            model.addAttribute("players", waitingPlayers);
-            return "menu/waitingRoom";
-        }
-
-        if (waitingPlayers.contains(playerName)) {
-            return "redirect:/?error=loggedOut";
-        }
-
-        session.setAttribute("playerName", playerName);
-        waitingPlayers.add(playerName);
+        model.addAttribute("_csrf", request.getAttribute("_csrf"));
+        model.addAttribute("playerName", currentName);
         model.addAttribute("players", waitingPlayers);
-        model.addAttribute("playerName", playerName);
         return "menu/waitingRoom";
     }
 
+    @PostMapping("/leave")
+    public String leave(HttpSession session) {
+        String playerName = (String) session.getAttribute("playerName");
+        if (playerName != null) {
+            waitingPlayers.remove(playerName);
+        }
+        session.invalidate();
+        return "redirect:/logout";
+    }
 }

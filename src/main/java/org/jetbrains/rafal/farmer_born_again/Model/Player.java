@@ -13,6 +13,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
