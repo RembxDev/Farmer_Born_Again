@@ -7,20 +7,29 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.UUID;
+
 @Controller
 @AllArgsConstructor
 @RequestMapping("/farm")
 public class GameController {
 
     @GetMapping("/")
-    public String startGame(HttpSession session, Model model) {
+    public String startGame(Model model, HttpSession session) {
         String playerName = (String) session.getAttribute("playerName");
+
         if (playerName == null) {
-            return "redirect:/";
+            return "redirect:/?error=loggedOut";
+        }
+
+        String gameId = (String) session.getAttribute("gameId");
+        if (gameId == null) {
+            gameId = UUID.randomUUID().toString();
+            session.setAttribute("gameId", gameId);
         }
 
         model.addAttribute("playerName", playerName);
+        model.addAttribute("gameId", gameId);
         return "game/farm";
     }
-
 }
