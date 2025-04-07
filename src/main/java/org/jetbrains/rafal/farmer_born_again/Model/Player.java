@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +16,7 @@ import java.util.Map;
 public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
     private String name;
 
     @ElementCollection
@@ -29,4 +31,17 @@ public class Player {
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Product> products;
 
+    Player(String name){
+        this.name = name;
+        this.silo = new HashMap<>();
+        this.silo.put("low_quality", 5);
+        this.silo.put("medium_quality", 0);
+        this.silo.put("high_quality", 0);
+        this.animals = new ArrayList<>();
+
+        this.products = new ArrayList<>();
+    }
 }
+
+
+

@@ -25,4 +25,15 @@ public class Animal {
     @JoinColumn(name = "player_id")
     private Player player;
 
+
+    Animal(String name, int RC, int FR, int sellPrice)
+    {
+        this.name = name;
+        this.reproductionChance = RC;
+        this.foodRequirement = FR;
+        this.sellPrice = sellPrice;
+        this.isFed = true;
+        this.isSick = false;
+
+    }
 }
