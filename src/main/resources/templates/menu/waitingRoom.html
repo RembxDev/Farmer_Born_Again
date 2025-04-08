@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Poczekalnia</title>
+    <meta charset="UTF-8">
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #playersList, #chatWindow {
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        #chatWindow {
+            height: 200px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        input[type="text"] {
+            padding: 5px;
+            width: 300px;
+        }
+        button {
+            padding: 8px 12px;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        h2, h3 { margin-top: 0; }
+    </style>
+
+
+</head>
+<body>
+
+<h2>Poczekalnia</h2>
+<p>Gracze aktualnie w poczekalni:</p>
+<ul id="playersList">
+    <li th:each="player : ${players}" th:text="${player}">Imię gracza</li>
+</ul>
+
+
+<span id="playerName" th:text="${playerName}" style="display:none;"></span>
+
+<h3>Czat Poczekalni</h3>
+<div id="chatWindow"></div>
+
+<input type="text" id="chatInput" placeholder="Wpisz wiadomość" />
+<button onclick="sendChatMessage()">💬 Wyślij</button>
+
+
+<div style="margin-top: 15px;">
+    <form action="/farm/" method="get" style="display:inline;">
+        <button type="submit">✅ Gotowy do gry</button>
+    </form>
+    <form action="/leave" method="post">
+        <button type="submit">🚪 Wyloguj</button>
+    </form>
+
+</div>
+
+<script src="/js/waitingRoom.js"></script>
+</body>
+</html>

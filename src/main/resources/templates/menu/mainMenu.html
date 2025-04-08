@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Super Farmer - Main Menu</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+        }
+        form {
+            margin-top: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 250px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🌾 Witaj w Super Farmer! 🐮</h1>
+
+
+<div th:if="${error}" class="error">
+    <p th:text="${error}"></p>
+</div>
+
+<div th:if="${param.error} == 'loggedOut'" style="color: red;">
+    <p>Sesja wygasła lub zostałes wylogowany. Zaloguj się ponownie.</p>
+</div>
+
+<form action="/waiting" method="get">
+    <label for="playerName">Podaj nazwę gracza:</label><br><br>
+    <input type="text" id="playerName" name="playerName" placeholder="np. FarmerRafał" required>
+    <button type="submit">🚜 Do poczekalni</button>
+</form>
+
+</body>
+</html>
