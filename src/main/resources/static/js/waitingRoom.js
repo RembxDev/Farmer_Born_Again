@@ -18,6 +18,14 @@ function connect() {
             console.log("Odebrano status gracza:", statusMessage);
             updatePlayerStatus(statusMessage);
         });
+
+        stompClient.subscribe('/topic/lobby/gameStartStatus', function(message) {
+            const status = JSON.parse(message.body);
+            if (status.type === "GAME_STARTED") {
+                console.log("Gra się zaczyna! Przenoszę do farmy...");
+                window.location.href = "/farm/";
+            }
+        });
     });
 }
 
@@ -60,6 +68,20 @@ function updatePlayerStatus(statusMsg) {
         }
     }
 }
+
+
+function markReady() {
+    fetch("/ready", {
+        method: "POST"
+    }).then(res => {
+        if (!res.ok) {
+            alert("Błąd: nie udało się oznaczyć jako gotowy");
+        } else {
+            console.log("Zgłoszono gotowość.");
+        }
+    });
+}
+
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Ładowanie strony poczekalni, nawiązywanie połączenia...");

@@ -7,6 +7,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
@@ -27,10 +29,11 @@ public class SecurityConfig extends WebMvcConfigurationSupport {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/", "/leave", "/js/**", "/css/**", "/images/**").permitAll()
-                        .requestMatchers("/waiting").permitAll()
-                        .requestMatchers("/farm/**").authenticated()
+                        .requestMatchers("/", "/waiting", "/ws/**", "/leave", "/js/**", "/css/**", "/images/**").permitAll()
+                        .requestMatchers("/farm/**", "/waitingRoom").authenticated()
                         .anyRequest().authenticated()
+                ) .exceptionHandling(exception -> exception
+                        .accessDeniedHandler(accessDeniedHandler())
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
@@ -45,6 +48,14 @@ public class SecurityConfig extends WebMvcConfigurationSupport {
 
 
         return http.build();
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        System.out.println("accessDeniedHandler");
+        return new AccessDeniedHandlerImpl() {{
+            setErrorPage("/waiting");
+        }};
     }
 }
 

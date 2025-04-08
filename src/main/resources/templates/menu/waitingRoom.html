@@ -37,7 +37,7 @@
 <h2>Poczekalnia</h2>
 <p>Gracze aktualnie w poczekalni:</p>
 <ul id="playersList">
-    <li th:each="player : ${players}" th:text="${player}">Imię gracza</li>
+    <li th:each="player : ${players}" th:text="${player.getName()}">Imię gracza</li>
 </ul>
 
 
@@ -51,9 +51,9 @@
 
 
 <div style="margin-top: 15px;">
-    <form action="/farm/" method="get" style="display:inline;">
-        <button type="submit">✅ Gotowy do gry</button>
-    </form>
+    
+    <button onclick="markReady()">✅ Gotowy do gry</button>
+
     <form action="/leave" method="post">
         <button type="submit">🚪 Wyloguj</button>
     </form>
