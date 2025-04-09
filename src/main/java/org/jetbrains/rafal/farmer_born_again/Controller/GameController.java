@@ -37,12 +37,39 @@ public class GameController {
         }
 
         Game game = player.getGame();
-        String gameId = game.getId();
 
-        session.setAttribute("player", player);
         model.addAttribute("player", player);
-        model.addAttribute("gameId", gameId);
+        model.addAttribute("game", game);
         return "game/farm";
     }
+
+    @PostMapping("/ready")
+    public ResponseEntity<Void> endTurn(HttpSession session) {
+        Player player = (Player) session.getAttribute("player");
+        if (player == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        gameService.endTurn(player);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/night")
+    public String nightPhase(HttpSession session, Model model) {
+        Player player = (Player) session.getAttribute("player");
+        if (player == null) {
+            return "redirect:/?error=loggedOut";
+        }
+        return "game/night";
+    }
+
+    @GetMapping("/morning")
+    public String morningPhase(HttpSession session, Model model) {
+        Player player = (Player) session.getAttribute("player");
+        if (player == null) {
+            return "redirect:/?error=loggedOut";
+        }
+        return "game/morning";
+    }
+
 
 }

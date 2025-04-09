@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Zapadła Noc</title>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 100px; }
+  </style>
+  <script>
+    let seconds = 15;
+    function countdown() {
+      const countdownEl = document.getElementById('countdown');
+      countdownEl.textContent = seconds;
+      seconds--;
+      if (seconds < 0) {
+        window.location.href = "/farm/morning";
+      } else {
+        setTimeout(countdown, 1000);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', countdown);
+  </script>
+</head>
+<body>
+<h1>🌙 Noc zapadła...</h1>
+<p>Wszyscy śpią. Przejście do poranka za <span id="countdown">15</span> sekund.</p>
+</body>
+</html>

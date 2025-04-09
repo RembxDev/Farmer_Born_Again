@@ -28,4 +28,14 @@ public class Game {
     public enum Phase {
         MORNING, DAY, NIGHT
     }
+
+    public void changeCycle() {
+        if(currentPhase.equals(Phase.MORNING)) {
+            currentPhase = Phase.DAY;
+        } else  if(currentPhase.equals(Phase.DAY)) {
+            currentPhase = Phase.NIGHT;
+        } else {
+            currentPhase = Phase.MORNING;
+        }
+    }
 }

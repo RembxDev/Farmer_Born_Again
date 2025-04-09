@@ -14,6 +14,20 @@ function connectGame() {
             console.log("Odebrano komunikat z gry:", event);
             addGameLog(event.description);
         });
+
+        stompClient.subscribe('/topic/game/'+ gameId + '/endTurn', function(message) {
+            const status = JSON.parse(message.body);
+            if (status.type === "NIGHT_TIME") {
+                console.log("Zapada Noc!...");
+                window.location.href = "/farm/night";
+            } else if (status.type === "NEW_MORNING") {
+                console.log("Wstaje Słońce!...");
+                window.location.href = "/farm/morning";
+            } else if (status.type === "DAY_TIME") {
+                console.log("Można zacząć Dzień!...");
+                window.location.href = "/farm/";
+            }
+        });
     });
 }
 
@@ -38,6 +52,18 @@ function addGameLog(message) {
     logEntry.textContent = message;
     gameLog.appendChild(logEntry);
     gameLog.scrollTop = gameLog.scrollHeight;
+}
+
+function markReady() {
+    fetch("/farm/ready", {
+        method: "POST"
+    }).then(res => {
+        if (!res.ok) {
+            alert("Błąd: nie udało się oznaczyć zakonczyć tury");
+        } else {
+            console.log("Zakończono Ture.");
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {

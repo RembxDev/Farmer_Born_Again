@@ -129,4 +129,26 @@ public class GameService {
         }
     }
 
+    public synchronized void endTurn(Player player) {
+        markPlayerFinishTurn(player);
+        Game game = player.getGame();
+
+        if (doesEveronefinishedTurn(game)) {
+            game.changeCycle();
+
+            messagingTemplate.convertAndSend(
+                    "/topic/game/"+game.getId()+"/endTurn",
+                    new GameStartStatusDTO("NIGHT_TIME", "Gracze zakończył ture!")
+            );
+        }
+    }
+
+    public void markPlayerFinishTurn(Player player) {
+        player.setFinishedTurn(true);
+    }
+
+    public boolean doesEveronefinishedTurn(Game game){
+        return game.getPlayers().stream().allMatch(Player::isFinishedTurn);
+    }
+
 }

@@ -28,7 +28,7 @@
 
 <h1>Sesja gry - Farma</h1>
 <p>Witaj, <span id="playerName" th:text="${player.getName()}"></span>!</p>
-<span id="gameId" th:text="${gameId}" style="display:none;"></span>
+<span id="gameId" th:text="${game.getId()}" style="display:none;"></span>
 
 <h3>Log sesji gry:</h3>
 <div id="gameLog">
@@ -38,6 +38,7 @@
 
 <div>
     <button onclick="sendFeedAction()">🐮 Nakarm zwierzę</button>
+    <button onclick="markReady()">Zakończ Ture</button>
     <form action="/waiting" method="get" style="display:inline;">
         <input type="hidden" name="playerName" th:value="${player.getName()}">
         <button type="submit">⬅️ Wróć do poczekalni</button>

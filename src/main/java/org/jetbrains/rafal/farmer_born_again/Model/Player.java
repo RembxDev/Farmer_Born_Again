@@ -42,6 +42,9 @@ public class Player implements Serializable {
     @Transient
     private boolean ready;
 
+    @Transient
+    private boolean finishedTurn;
+
     public Player(String name){
         this.name = name;
         this.silo = new HashMap<>();
@@ -51,6 +54,7 @@ public class Player implements Serializable {
         this.animals = new ArrayList<>();
         this.products = new ArrayList<>();
         this.ready = false;
+        this.finishedTurn = false;
     }
 }
 
