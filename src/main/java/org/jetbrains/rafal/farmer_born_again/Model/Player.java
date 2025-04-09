@@ -53,6 +53,9 @@ public class Player implements Serializable {
         this.silo.put("high_quality", 0);
         this.animals = new ArrayList<>();
         this.products = new ArrayList<>();
+        Animal animal = new Animal("rabbit",80,0,1,this);
+        this.animals.add(animal);
+        this.animals.add(animal);
         this.ready = false;
         this.finishedTurn = false;
     }

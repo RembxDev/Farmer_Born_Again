@@ -13,7 +13,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -70,6 +73,23 @@ public class GameController {
         }
         return "game/morning";
     }
+
+    @GetMapping("/morning/process")
+    @ResponseBody
+    public Map<String, Object> processMorning(HttpSession session) {
+        Player player = (Player) session.getAttribute("player");
+
+        if (player == null) {
+            return Map.of(
+                    "log", List.of("❌ Błąd: Nie znaleziono gracza."),
+                    "diceResults", List.of()
+            );
+        }
+
+        return gameService.handleMorningPhase(player);
+    }
+
+
 
 
 }

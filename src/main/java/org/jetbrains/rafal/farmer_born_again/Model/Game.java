@@ -13,7 +13,7 @@ import java.util.List;
 @Entity
 public class Game {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     private int tureNumber;
     @Enumerated(EnumType.STRING)

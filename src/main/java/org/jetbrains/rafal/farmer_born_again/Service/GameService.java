@@ -3,6 +3,7 @@ package org.jetbrains.rafal.farmer_born_again.Service;
 import lombok.AllArgsConstructor;
 import org.jetbrains.rafal.farmer_born_again.DTO.GameStartStatusDTO;
 import org.jetbrains.rafal.farmer_born_again.DTO.PlayerStatusDTO;
+import org.jetbrains.rafal.farmer_born_again.Model.Animal;
 import org.jetbrains.rafal.farmer_born_again.Model.Game;
 import org.jetbrains.rafal.farmer_born_again.Model.Player;
 import org.jetbrains.rafal.farmer_born_again.Repository.GameRepository;
@@ -150,5 +151,69 @@ public class GameService {
     public boolean doesEveronefinishedTurn(Game game){
         return game.getPlayers().stream().allMatch(Player::isFinishedTurn);
     }
+
+    public Map<String, Object> handleMorningPhase(Player player) {
+        List<String> log = new ArrayList<>();
+        List<String> diceResults = new ArrayList<>();
+
+        List<Animal> playerAnimals = player.getAnimals();
+        if (playerAnimals == null || playerAnimals.isEmpty()) {
+            log.add("Brak zwierząt na farmie.");
+            return Map.of(
+                    "log", log,
+                    "diceResults", List.of()
+            );
+        }
+
+        List<String> possibleTypes = List.of("rabbit", "sheep", "cow", "fox");
+        Random rand = new Random();
+
+        for (int i = 0; i < 3; i++) {
+            String rolledType = possibleTypes.get(rand.nextInt(possibleTypes.size()));
+            diceResults.add(rolledType);
+            log.add("🎲 Rzut #" + (i + 1) + ": " + rolledType);
+
+            if (rolledType.equals("fox")) {
+                log.add("🦊 Lis zakradł się na farmę... (ale jeszcze nie robi nic)");
+                continue;
+            }
+
+            long validCount = playerAnimals.stream()
+                    .filter(a -> a.getName().equals(rolledType) && !a.isSick() && a.isFed())
+                    .count();
+
+            if (validCount >= 2) {
+                Animal template = playerAnimals.stream()
+                        .filter(a -> a.getName().equals(rolledType))
+                        .findFirst()
+                        .orElse(null);
+
+                if (template != null && rand.nextInt(100) < template.getReproductionChance()) {
+                    Animal baby = new Animal();
+                    baby.setName(template.getName());
+                    baby.setReproductionChance(template.getReproductionChance());
+                    baby.setFoodRequirement(template.getFoodRequirement());
+                    baby.setSellPrice(template.getSellPrice());
+                    baby.setSick(false);
+                    baby.setFed(false);
+                    baby.setPlayer(player);
+                    player.getAnimals().add(baby);
+
+                    log.add("✨ Nowe zwierzę urodziło się: " + baby.getName());
+                } else {
+                    log.add("❌ Nie udało się rozmnożyć " + rolledType);
+                }
+            } else {
+                log.add("⚠️ Za mało zdrowych i najedzonych " + rolledType + " do rozmnażania.");
+            }
+        }
+
+        return Map.of(
+                "log", log,
+                "diceResults", diceResults
+        );
+    }
+
+
 
 }
