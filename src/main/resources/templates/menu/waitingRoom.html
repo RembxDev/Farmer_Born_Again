@@ -37,8 +37,13 @@
 <h2>Poczekalnia</h2>
 <p>Gracze aktualnie w poczekalni:</p>
 <ul id="playersList">
-    <li th:each="player : ${players}" th:text="${player.getName()}">Imię gracza</li>
+    <li th:each="p : ${players}"
+        th:id="'player-' + ${p.name}"
+        th:text="${p.ready} ? ${p.name + ' ✅'} : ${p.name + ' ⏳'}">
+        Gracz
+    </li>
 </ul>
+
 
 
 <span id="playerName" th:text="${playerName}" style="display:none;"></span>
@@ -52,7 +57,7 @@
 
 <div style="margin-top: 15px;">
     
-    <button onclick="markReady()">✅ Gotowy do gry</button>
+    <button onclick="markReady()">Start</button>
 
     <form action="/leave" method="post">
         <button type="submit">🚪 Wyloguj</button>

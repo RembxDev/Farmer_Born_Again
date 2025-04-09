@@ -26,6 +26,21 @@ function connect() {
                 window.location.href = "/farm/";
             }
         });
+
+        stompClient.subscribe('/topic/lobby/playerList', function(message) {
+            const players = JSON.parse(message.body);
+            const playersList = document.getElementById('playersList');
+            playersList.innerHTML = '';
+            players.forEach(player => {
+                const li = document.createElement('li');
+                li.id = "player-" + player.playerName;
+                li.textContent = player.status === "READY"
+                    ? `${player.playerName} ✅`
+                    : `${player.playerName} ⏳`;
+                playersList.appendChild(li);
+            });
+        });
+
     });
 }
 
@@ -54,21 +69,28 @@ function sendChatMessage() {
 
 function updatePlayerStatus(statusMsg) {
     const playersList = document.getElementById('playersList');
+    const existingPlayer = document.getElementById("player-" + statusMsg.playerName);
+
     if (statusMsg.status === "JOINED") {
-        const li = document.createElement('li');
-        li.id = "player-" + statusMsg.playerName;
-        li.textContent = statusMsg.playerName;
-        playersList.appendChild(li);
-        console.log("Gracz dołączył:", statusMsg.playerName);
+        if (!existingPlayer) {
+            const li = document.createElement('li');
+            li.id = "player-" + statusMsg.playerName;
+            li.textContent = `${statusMsg.playerName} ⏳`;
+            playersList.appendChild(li);
+        }
+        if (existingPlayer) {
+            existingPlayer.textContent = `${statusMsg.playerName} ⏳`;
+        }
+    } else if (statusMsg.status === "READY") {
+        if (existingPlayer) {
+            existingPlayer.textContent = `${statusMsg.playerName} ✅`;
+        }
     } else if (statusMsg.status === "LEFT") {
-        const playerElement = document.getElementById("player-" + statusMsg.playerName);
-        if (playerElement) {
-            playersList.removeChild(playerElement);
-            console.log("Gracz opuścił:", statusMsg.playerName);
+        if (existingPlayer) {
+            playersList.removeChild(existingPlayer);
         }
     }
 }
-
 
 function markReady() {
     fetch("/ready", {
@@ -81,7 +103,6 @@ function markReady() {
         }
     });
 }
-
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Ładowanie strony poczekalni, nawiązywanie połączenia...");

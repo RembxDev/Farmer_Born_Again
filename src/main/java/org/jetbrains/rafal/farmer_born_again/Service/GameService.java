@@ -2,6 +2,7 @@ package org.jetbrains.rafal.farmer_born_again.Service;
 
 import lombok.AllArgsConstructor;
 import org.jetbrains.rafal.farmer_born_again.DTO.GameStartStatusDTO;
+import org.jetbrains.rafal.farmer_born_again.DTO.PlayerStatusDTO;
 import org.jetbrains.rafal.farmer_born_again.Model.Game;
 import org.jetbrains.rafal.farmer_born_again.Model.Player;
 import org.jetbrains.rafal.farmer_born_again.Repository.GameRepository;
@@ -9,10 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @AllArgsConstructor
@@ -21,23 +19,33 @@ public class GameService {
     private final Map<String, Game> waitingGames = new ConcurrentHashMap<>();
     private final GameRepository gameRepository;
     private static final int MAX_PLAYERS = 2;
+    private final Map<String, Player> allPlayers = new ConcurrentHashMap<>();
+
 
     public synchronized Game assignPlayerToGame(Player player) {
         Optional<Game> openGame = waitingGames.values().stream()
                 .filter(g -> g.getPlayers().size() < MAX_PLAYERS && !g.isStarted())
                 .findFirst();
 
+        Player existing = allPlayers.get(player.getName());
+        if (existing != null) {
+            return existing.getGame();
+        }
+        allPlayers.put(player.getName(), player);
+
+
         Game game;
         if (openGame.isPresent()) {
             game = openGame.get();
         } else {
             game = new Game();
+            game.setId(UUID.randomUUID().toString());
             game.setTureNumber(0);
             game.setCurrentPhase(Game.Phase.MORNING);
             game.setStarted(false);
             game.setCurrentEvent(null);
             game.setPlayers(new ArrayList<>());
-            waitingGames.put(UUID.randomUUID().toString(), game);
+            waitingGames.put(game.getId(), game);
         }
 
         boolean alreadyInGame = game.getPlayers().stream()
@@ -45,9 +53,12 @@ public class GameService {
 
         if (!alreadyInGame) {
             game.getPlayers().add(player);
+            broadcastPlayerStatus(player, "JOINED");
+
         }
         player.setGame(game);
 
+        broadcastPlayerList(game);
         return game;
     }
 
@@ -68,9 +79,32 @@ public class GameService {
         }
     }
 
+    private void broadcastPlayerList(Game game) {
+        List<PlayerStatusDTO> playerNames = game.getPlayers().stream()
+                .map(p -> new PlayerStatusDTO(p.getName(), p.isReady() ? "READY" : "JOINED"))
+                .toList();
+
+        messagingTemplate.convertAndSend(
+                "/topic/lobby/playerList",
+                playerNames
+        );
+    }
+
+    private void broadcastPlayerStatus(Player player, String status) {
+        messagingTemplate.convertAndSend(
+                "/topic/lobby/status",
+                new PlayerStatusDTO(player.getName(), status)
+        );
+    }
 
     public void markPlayerReady(Player player) {
-        player.setReady(true);
+        if(!player.isReady()) {
+            player.setReady(true);
+            broadcastPlayerStatus(player, "READY");
+        } else {
+            player.setReady(false);
+            broadcastPlayerStatus(player, "JOINED");
+        }
     }
 
     public boolean isGameReady(Game game) {
@@ -87,7 +121,8 @@ public class GameService {
         if (game != null) {
             game.getPlayers().remove(player);
             player.setGame(null);
-
+            broadcastPlayerList(game);
+            broadcastPlayerStatus(player, "LEFT");
             if (game.getPlayers().isEmpty()) {
                 removeGame(game);
             }

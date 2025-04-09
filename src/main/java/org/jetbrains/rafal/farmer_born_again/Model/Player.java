@@ -1,5 +1,6 @@
 package org.jetbrains.rafal.farmer_born_again.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,6 +34,7 @@ public class Player implements Serializable {
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Product> products;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "game_id")
     private Game game;
