@@ -13,12 +13,12 @@ import java.util.List;
 @Entity
 public class Game {
     @Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     private int tureNumber;
     @Enumerated(EnumType.STRING)
     private Phase currentPhase;
-    private String currentEvent;
+    @Enumerated(EnumType.STRING)
+    private NightEventType currentEvent;
     private boolean started;
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
@@ -38,4 +38,18 @@ public class Game {
             currentPhase = Phase.MORNING;
         }
     }
+
+    public enum NightEventType {
+        SPOKOJNA_NOC, DOBRE_ZBIORY, MILA_POGODA, POPYT_NA_PRODUKT, JARMARK, WYPRZEDAZ,
+        CHOROBA, INTENSYWNA_BURZA, SUSZA, ZLA_POGODA
+    }
+
+    public void setBreedingBonus(int bonus){
+
+    }
+
+    public void setPriceBonus(int bonus){
+
+    }
+
 }

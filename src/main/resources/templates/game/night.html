@@ -1,13 +1,30 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Zapadła Noc</title>
+  <title>🌙 Noc na farmie</title>
   <meta charset="UTF-8">
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin-top: 100px; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 100px;
+      background-color: #1c1c1c;
+      color: white;
+    }
+    h1 {
+      font-size: 36px;
+    }
+    .event {
+      margin-top: 40px;
+      font-size: 24px;
+    }
+    .desc {
+      font-size: 18px;
+      color: #ccc;
+    }
   </style>
   <script>
-    let seconds = 15;
+    let seconds = 10;
     function countdown() {
       const countdownEl = document.getElementById('countdown');
       countdownEl.textContent = seconds;
@@ -22,7 +39,11 @@
   </script>
 </head>
 <body>
-<h1>🌙 Noc zapadła...</h1>
-<p>Wszyscy śpią. Przejście do poranka za <span id="countdown">15</span> sekund.</p>
+<h1>🌙 Zapadła noc...</h1>
+<div class="event">
+  <strong th:text="${eventName}">[Nazwa eventu]</strong>
+  <div class="desc" th:text="${eventDescription}">[Opis eventu]</div>
+</div>
+<p style="margin-top: 50px;">Przejście do poranka za <span id="countdown">10</span> sekund</p>
 </body>
 </html>

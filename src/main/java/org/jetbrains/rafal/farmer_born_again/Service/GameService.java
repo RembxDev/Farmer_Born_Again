@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.jetbrains.rafal.farmer_born_again.DTO.GameStartStatusDTO;
 import org.jetbrains.rafal.farmer_born_again.DTO.PlayerStatusDTO;
 import org.jetbrains.rafal.farmer_born_again.Model.Animal;
+import org.jetbrains.rafal.farmer_born_again.Model.Event;
 import org.jetbrains.rafal.farmer_born_again.Model.Game;
 import org.jetbrains.rafal.farmer_born_again.Model.Player;
 import org.jetbrains.rafal.farmer_born_again.Repository.GameRepository;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static org.jetbrains.rafal.farmer_born_again.Model.Game.NightEventType.SPOKOJNA_NOC;
 
 @AllArgsConstructor
 @Service
@@ -44,7 +47,7 @@ public class GameService {
             game.setTureNumber(0);
             game.setCurrentPhase(Game.Phase.MORNING);
             game.setStarted(false);
-            game.setCurrentEvent(null);
+            game.setCurrentEvent(SPOKOJNA_NOC);
             game.setPlayers(new ArrayList<>());
             waitingGames.put(game.getId(), game);
         }
@@ -136,6 +139,8 @@ public class GameService {
 
         if (doesEveronefinishedTurn(game)) {
             game.changeCycle();
+            triggerNightEvent(game);
+
 
             messagingTemplate.convertAndSend(
                     "/topic/game/"+game.getId()+"/endTurn",
@@ -213,6 +218,15 @@ public class GameService {
                 "diceResults", diceResults
         );
     }
+
+    public void triggerNightEvent(Game game) {
+        Game.NightEventType[] all = Game.NightEventType.values();
+        Game.NightEventType drawn = all[new Random().nextInt(all.length)];
+        game.setCurrentEvent(drawn);
+        Event.applyEventEffect(game);
+        //gameRepository.save(game);
+    }
+
 
 
 
