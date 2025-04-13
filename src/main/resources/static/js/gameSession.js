@@ -13,7 +13,31 @@ function connectGame() {
             const event = JSON.parse(message.body);
             console.log("Odebrano komunikat z gry:", event);
             addGameLog(event.description);
+
+
+            if (event.action === "FEED_ANIMAL" && event.feedLevel !== undefined && event.targetId !== undefined) {
+                const feedSpan = document.getElementById("feedLevel-" + event.targetId);
+                if (feedSpan) {
+                    feedSpan.textContent = event.feedLevel;
+                }
+            }
+
+            if (event.action === "TURN_PROGRESS") {
+                const turnStatus = document.getElementById("turnStatus");
+                if (turnStatus) {
+                    turnStatus.textContent = event.description;
+                }
+
+
+                if (event.player === playerName) {
+                    const btn = document.getElementById("readyButton");
+                    const currentlyFinished = btn.textContent.includes("Cofnij");
+                    toggleReadyButtonText(!currentlyFinished);
+                }
+            }
         });
+
+
 
         stompClient.subscribe('/topic/game/'+ gameId + '/endTurn', function(message) {
             const status = JSON.parse(message.body);
@@ -31,19 +55,21 @@ function connectGame() {
     });
 }
 
-function sendFeedAction() {
-    if (stompClient) {
-        const actionEvent = {
-            action: "FEED_ANIMAL",
-            player: playerName,
-            targetId: 42,
-            description: playerName + " nakarmił zwierzę o ID 42"
-        };
-        console.log("Wysyłanie akcji:", actionEvent);
-        stompClient.send("/app/game/" + gameId + "/action", {}, JSON.stringify(actionEvent));
-    } else {
-        console.warn("Brak połączenia WebSocket. Akcja nie została wysłana.");
+function feedAnimal(animalId) {
+    if (!stompClient || !stompClient.connected) {
+        console.warn("Brak połączenia WebSocket.");
+        return;
     }
+
+    const actionEvent = {
+        action: "FEED_ANIMAL",
+        player: playerName,
+        targetId: animalId,
+        description: playerName + " nakarmił zwierzę o ID " + animalId
+    };
+
+    console.log("🔼 Wysyłam akcję karmienia:", actionEvent);
+    stompClient.send("/app/game/" + gameId + "/action", {}, JSON.stringify(actionEvent));
 }
 
 function addGameLog(message) {
@@ -70,3 +96,14 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("Ładowanie strony, nawiązywanie połączenia z sesją gry...");
     connectGame();
 });
+
+function toggleReadyButtonText(isFinished) {
+    const btn = document.getElementById("readyButton");
+    if (isFinished) {
+        btn.textContent = "⬅️ Cofnij zakończenie tury";
+    } else {
+        btn.textContent = "✅ Zakończ turę";
+    }
+}
+
+

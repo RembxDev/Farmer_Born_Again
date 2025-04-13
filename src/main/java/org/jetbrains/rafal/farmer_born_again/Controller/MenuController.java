@@ -30,7 +30,7 @@ public class MenuController {
     }
 
     @GetMapping("/")
-    public String play(Model model) {
+    public String play() {
         return "menu/mainMenu";
     }
 

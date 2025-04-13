@@ -39,16 +39,24 @@
 <h3>Twoje zwierzęta:</h3>
 <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
     <div th:each="animal : ${player.animals}"
-         style="border: 1px solid #ccc; padding: 10px; border-radius: 10px; background-color: #fff; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); min-width: 120px;">
-        <div style="font-size: 24px;">🐾 <span th:text="${animal.name}"></span></div>
-        <div th:text="${animal.fed} ? '🍽️ Najedzony' : '🥄 Głodny'"></div>
+         style="border: 1px solid #ccc; padding: 10px; border-radius: 10px; background-color: #fff; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); min-width: 160px;">
+        <div style="font-size: 24px;">
+            🐾 <span th:text="${animal.name}"></span>
+            <small>(ID: <span th:text="${animal.id}"></span>)</small>
+        </div>
+        <div>
+            🍗 Poziom sytości:
+            <span th:text="${animal.feedLevel}" th:attr="id='feedLevel-' + ${animal.id}">0</span>/5
+        </div>
         <div th:text="${animal.sick} ? '🤒 Chory' : '💪 Zdrowy'"></div>
+        <button th:attr="onclick='feedAnimal(' + ${animal.id} + ')'" style="margin-top: 10px;">🍽️ Nakarm</button>
     </div>
 </div>
 
 <div>
-    <button onclick="sendFeedAction()">🐮 Nakarm zwierzę</button>
-    <button onclick="markReady()">Zakończ Ture</button>
+
+    <button id="readyButton" onclick="markReady()">✅ Zakończ turę</button>
+    <p id="turnStatus" style="font-weight: bold; color: #555;">Zakończyło turę: 0/2</p>
     <form action="/waiting" method="get" style="display:inline;">
         <input type="hidden" name="playerName" th:value="${player.getName()}">
         <button type="submit">⬅️ Wróć do poczekalni</button>

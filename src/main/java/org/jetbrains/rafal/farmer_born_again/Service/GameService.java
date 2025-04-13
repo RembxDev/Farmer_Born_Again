@@ -1,6 +1,7 @@
 package org.jetbrains.rafal.farmer_born_again.Service;
 
 import lombok.AllArgsConstructor;
+import org.jetbrains.rafal.farmer_born_again.DTO.GameActionEventDTO;
 import org.jetbrains.rafal.farmer_born_again.DTO.GameStartStatusDTO;
 import org.jetbrains.rafal.farmer_born_again.DTO.PlayerStatusDTO;
 import org.jetbrains.rafal.farmer_born_again.Model.Animal;
@@ -22,9 +23,13 @@ import static org.jetbrains.rafal.farmer_born_again.Model.Game.NightEventType.SP
 public class GameService {
     private final Map<String, Game> waitingGames = new ConcurrentHashMap<>();
     private final GameRepository gameRepository;
+    private final AnimalService animalService;
     private static final int MAX_PLAYERS = 2;
     private final Map<String, Player> allPlayers = new ConcurrentHashMap<>();
 
+    public Game getGameById(String gameId) {
+        return waitingGames.get(gameId);
+    }
 
     public synchronized Game assignPlayerToGame(Player player) {
         Optional<Game> openGame = waitingGames.values().stream()
@@ -59,6 +64,13 @@ public class GameService {
             game.getPlayers().add(player);
             broadcastPlayerStatus(player, "JOINED");
 
+            Animal rabbit1 = animalService.createAnimal("rabbit", 80, 0, 1, player);
+            Animal rabbit2 = animalService.createAnimal("rabbit", 80, 0, 1, player);
+            player.setAnimals(new ArrayList<>());
+            player.getAnimals().add(rabbit1);
+            player.getAnimals().add(rabbit2);
+        } else {
+            player.setGame(game);
         }
         player.setGame(game);
 
@@ -66,7 +78,7 @@ public class GameService {
         return game;
     }
 
-    @Autowired
+
     private SimpMessagingTemplate messagingTemplate;
 
     public synchronized void markPlayerReadyAndStartIfPossible(Player player) {
@@ -118,6 +130,13 @@ public class GameService {
 
     public void removeGame(Game game) {
         waitingGames.values().removeIf(g -> g == game);
+
+
+        if (game.getPlayers() != null) {
+            for (Player p : game.getPlayers()) {
+                allPlayers.remove(p.getName());
+            }
+        }
     }
 
     public void removePlayerFromGame(Player player) {
@@ -135,22 +154,39 @@ public class GameService {
 
     public synchronized void endTurn(Player player) {
         markPlayerFinishTurn(player);
+
+
         Game game = player.getGame();
+
+        long finished = game.getPlayers().stream().filter(Player::isFinishedTurn).count();
+        int total = game.getPlayers().size();
+
+        GameActionEventDTO turnProgress = new GameActionEventDTO();
+        turnProgress.setAction("TURN_PROGRESS");
+        turnProgress.setPlayer(player.getName());
+        turnProgress.setDescription("🔄 " + finished + "/" + total + " graczy zakończyło turę");
+
+        messagingTemplate.convertAndSend("/topic/game/" + game.getId(), turnProgress);
 
         if (doesEveronefinishedTurn(game)) {
             game.changeCycle();
+
+
+            for (Player p : game.getPlayers()) {
+                p.setFinishedTurn(false);
+            }
+
             triggerNightEvent(game);
 
-
             messagingTemplate.convertAndSend(
-                    "/topic/game/"+game.getId()+"/endTurn",
-                    new GameStartStatusDTO("NIGHT_TIME", "Gracze zakończył ture!")
+                    "/topic/game/" + game.getId() + "/endTurn",
+                    new GameStartStatusDTO("NIGHT_TIME", "Gracze zakończyli turę!")
             );
         }
     }
 
     public void markPlayerFinishTurn(Player player) {
-        player.setFinishedTurn(true);
+        player.setFinishedTurn(!player.isFinishedTurn());
     }
 
     public boolean doesEveronefinishedTurn(Game game){
@@ -184,7 +220,7 @@ public class GameService {
             }
 
             long validCount = playerAnimals.stream()
-                    .filter(a -> a.getName().equals(rolledType) && !a.isSick() && a.isFed())
+                    .filter(a -> a.getName().equals(rolledType) && !a.isSick() && a.getFeedLevel() >= 4)
                     .count();
 
             if (validCount >= 2) {
@@ -194,17 +230,17 @@ public class GameService {
                         .orElse(null);
 
                 if (template != null && rand.nextInt(100) < template.getReproductionChance()) {
-                    Animal baby = new Animal();
-                    baby.setName(template.getName());
-                    baby.setReproductionChance(template.getReproductionChance());
-                    baby.setFoodRequirement(template.getFoodRequirement());
-                    baby.setSellPrice(template.getSellPrice());
-                    baby.setSick(false);
-                    baby.setFed(false);
-                    baby.setPlayer(player);
-                    player.getAnimals().add(baby);
+                    Animal baby = animalService.createAnimal(
+                            template.getName(),
+                            template.getReproductionChance(),
+                            template.getFoodRequirement(),
+                            template.getSellPrice(),
+                            player
+                    );
 
-                    log.add("✨ Nowe zwierzę urodziło się: " + baby.getName());
+                    player.getAnimals().add(baby);
+                    log.add("✨ Nowe zwierzę urodziło się: " + baby.getName() + " (ID: " + baby.getId() + ")");
+
                 } else {
                     log.add("❌ Nie udało się rozmnożyć " + rolledType);
                 }
@@ -223,8 +259,20 @@ public class GameService {
         Game.NightEventType[] all = Game.NightEventType.values();
         Game.NightEventType drawn = all[new Random().nextInt(all.length)];
         game.setCurrentEvent(drawn);
+
         Event.applyEventEffect(game);
-        //gameRepository.save(game);
+
+
+        for (Player player : game.getPlayers()) {
+            List<String> feedingLogs = animalService.updateFeedingLevels(player);
+            for (String msg : feedingLogs) {
+                GameActionEventDTO logMsg = new GameActionEventDTO();
+                logMsg.setAction("HUNGER_UPDATE");
+                logMsg.setPlayer(player.getName());
+                logMsg.setDescription(msg);
+                messagingTemplate.convertAndSend("/topic/game/" + game.getId(), logMsg);
+            }
+        }
     }
 
 

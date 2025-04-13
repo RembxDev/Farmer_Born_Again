@@ -50,7 +50,40 @@
     .static {
       animation: none !important;
     }
+
+    .clock {
+      margin: 30px auto;
+      border: 5px solid #333;
+      border-radius: 50%;
+      width: 150px;
+      height: 150px;
+      position: relative;
+    }
+
+    .hand {
+      width: 50%;
+      height: 4px;
+      background: #45fdff;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: 0%;
+      transform: rotate(-90deg);
+      transition: transform 1s linear;
+    }
+
+    .center-dot {
+      width: 10px;
+      height: 10px;
+      background: #333;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+    }
   </style>
+  <script src="/js/timer.js"></script>
 </head>
 <body>
 
@@ -64,6 +97,12 @@
 </div>
 
 <div id="log"></div>
+
+<div class="clock">
+  <div class="hand" id="hand"></div>
+  <div class="center-dot"></div>
+</div>
+
 <p>Powrót do gry za <span id="countdown">15</span> sekund</p>
 
 <script>
@@ -73,20 +112,6 @@
     "cow": "🐄",
     "fox": "🦊"
   };
-
-  let seconds = 10;
-
-  function countdown() {
-    const countdownEl = document.getElementById('countdown');
-    const timer = setInterval(() => {
-      seconds--;
-      countdownEl.textContent = seconds;
-      if (seconds <= 0) {
-        clearInterval(timer);
-        window.location.href = "/farm/";
-      }
-    }, 1000);
-  }
 
   function appendToLog(message) {
     const logDiv = document.getElementById('log');
@@ -112,7 +137,11 @@
                 if (data.diceResults && data.log) {
                   stopAnimationAndShowResults(data.diceResults);
                   data.log.forEach(msg => appendToLog(msg));
-                  countdown();
+                  startCountdown({
+                    seconds: 15,
+                    onCompleteRedirect: "/farm/",
+                    updateVisuals: true
+                  });
                 } else {
                   appendToLog("❌ Błąd: Brak wyników kostek.");
                 }

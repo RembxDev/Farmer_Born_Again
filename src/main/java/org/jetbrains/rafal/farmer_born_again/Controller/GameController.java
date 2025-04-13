@@ -29,10 +29,10 @@ public class GameController {
 
     private final GameService gameService;
 
-    GameController( GameService gameservice) {
-
-        this.gameService = gameservice;
+    public GameController(final GameService gameService) {
+        this.gameService = gameService;
     }
+
 
     @GetMapping("/")
     public String startGame(Model model, HttpSession session) {
@@ -77,7 +77,7 @@ public class GameController {
     }
 
     @GetMapping("/morning")
-    public String morningPhase(HttpSession session, Model model) {
+    public String morningPhase(HttpSession session) {
         Player player = (Player) session.getAttribute("player");
         if (player == null) {
             return "redirect:/?error=loggedOut";
