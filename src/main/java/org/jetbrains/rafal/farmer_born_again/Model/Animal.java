@@ -32,7 +32,7 @@ public class Animal {
         this.reproductionChance = reproductionChance;
         this.foodRequirement = foodRequirement;
         this.sellPrice = sellPrice;
-        this.isFed = true;
+        this.isFed = false;
         this.isSick = false;
         this.feedLevel = 5;
         this.player = player;

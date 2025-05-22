@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -42,11 +43,13 @@ public class GameController {
             return "redirect:/?error=loggedOut";
         }
 
+
         Game game = player.getGame();
         game.setCurrentPhase(Game.Phase.DAY);
         model.addAttribute("eventName", formatEventName(game.getCurrentEvent()));
         model.addAttribute("player", player);
         model.addAttribute("game", game);
+        model.addAttribute("silo", player.getSilo());
         return "game/farm";
     }
 

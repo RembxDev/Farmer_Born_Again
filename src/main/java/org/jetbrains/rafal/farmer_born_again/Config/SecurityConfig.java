@@ -59,4 +59,3 @@ public class SecurityConfig extends WebMvcConfigurationSupport {
     }
 }
 
-

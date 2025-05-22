@@ -65,28 +65,41 @@ public class AnimalService {
         return logs;
     }
 
-    public String feedAnimalById(Player player, Long animalId) {
-        List<Animal> animals = player.getAnimals();
-        Animal target = null;
+    public Optional<Animal> feedAnimalById(Player player, Integer animalId) {
 
-        for (Animal animal : animals) {
-            if (animal.getId() != null && animal.getId().equals(animalId)) {
-                target = animal;
-                break;
-            }
-        }
+
+
+        Animal target = player.getAnimals().stream()
+                .filter(a -> a.getId() != null && a.getId().equals(animalId))
+                .findFirst()
+                .orElse(null);
 
         if (target == null) {
-            return "❌ Zwierzę o ID " + animalId + " nie znalezione u gracza.";
+            return Optional.empty();
         }
 
-        int before = target.getFeedLevel();
-        if (before >= 5) {
-            return "ℹ️ " + target.getName() + " jest już najedzony (poziom 5)";
+        String siloKey;
+        switch (target.getFoodRequirement()) {
+            case 0 -> siloKey = null;
+            case 1 -> siloKey = "low_quality";
+            case 2 -> siloKey = "medium_quality";
+            default -> siloKey = "high_quality";
         }
 
-        target.setFeedLevel(before + 1);
-        return "✅ " + target.getName() + " został nakarmiony (" + before + " → " + (before + 1) + ")";
+        if (siloKey != null && target.getFeedLevel()<5) {
+            Integer avail = player.getSilo().getOrDefault(siloKey, 0);
+            System.out.printf(avail.toString());
+            if (avail <= 0) {
+
+                target.setFeedLevel(target.getFeedLevel());
+                return Optional.of(target);
+            }
+            player.getSilo().put(siloKey, avail - 1);
+            target.setFeedLevel(5);
+            target.setFed(true);
+        }
+
+        return Optional.of(target);
     }
 
     public Animal createAnimal(String name, int reproductionChance, int foodRequirement, int sellPrice, Player player) {
@@ -98,12 +111,11 @@ public class AnimalService {
         animal.setSellPrice(sellPrice);
         animal.setSick(false);
         animal.setFed(false);
-        animal.setFeedLevel(3);
+        animal.setFeedLevel(5);
         animal.setPlayer(player);
         return animal;
     }
 
 
 }
-
 

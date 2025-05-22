@@ -30,7 +30,10 @@
 <p>Witaj, <span id="playerName" th:text="${player.getName()}"></span>!</p>
 <span id="gameId" th:text="${game.getId()}" style="display:none;"></span>
 <p th:text="'🌟 Aktualny Event: ' + ${eventName}"></p>
-
+<div th:each="feed : ${silo}">
+    <span th:text="${feed.getKey()}"></span>
+    <span th:text="${feed.getValue().toString()}"></span>
+</div>
 <h3>Log sesji gry:</h3>
 <div id="gameLog">
 

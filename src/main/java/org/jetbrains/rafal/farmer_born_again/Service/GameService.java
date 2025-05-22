@@ -66,9 +66,11 @@ public class GameService {
 
             Animal rabbit1 = animalService.createAnimal("rabbit", 80, 0, 1, player);
             Animal rabbit2 = animalService.createAnimal("rabbit", 80, 0, 1, player);
+            Animal chicken = animalService.createAnimal("chicken", 80, 1, 1, player);
             player.setAnimals(new ArrayList<>());
             player.getAnimals().add(rabbit1);
             player.getAnimals().add(rabbit2);
+            player.getAnimals().add(chicken);
         } else {
             player.setGame(game);
         }
