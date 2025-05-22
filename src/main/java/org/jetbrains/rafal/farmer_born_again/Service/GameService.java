@@ -208,7 +208,7 @@ public class GameService {
             );
         }
 
-        List<String> possibleTypes = List.of("rabbit", "sheep", "cow", "fox");
+        List<String> possibleTypes = List.of("rabbit","chicken", "sheep", "cow", "fox");
         Random rand = new Random();
 
         for (int i = 0; i < 3; i++) {

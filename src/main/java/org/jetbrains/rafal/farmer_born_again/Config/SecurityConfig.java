@@ -30,7 +30,7 @@ public class SecurityConfig extends WebMvcConfigurationSupport {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/", "/waiting", "/ws/**", "/leave", "/js/**", "/css/**", "/images/**").permitAll()
-                        .requestMatchers("/farm/**", "/waitingRoom").authenticated()
+                        .requestMatchers("/farm/**", "/waitingRoom", "/market/**").authenticated()
                         .anyRequest().authenticated()
                 ) .exceptionHandling(exception -> exception
                         .accessDeniedHandler(accessDeniedHandler())

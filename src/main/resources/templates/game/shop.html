@@ -1,10 +1,121 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Rynek</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f8f8f8;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .market {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .shop {
+            background-color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            width: 300px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .shop h2 {
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        button {
+            margin-top: 10px;
+            margin-right: 10px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .msg {
+            text-align: center;
+            font-weight: bold;
+            color: green;
+        }
+    </style>
 </head>
 <body>
+
+<h1>🏪 Rynek</h1>
+
+<div class="msg" th:if="${message}" th:text="${message}"></div>
+
+
+
+<div class="market">
+
+    <div class="shop">
+        <form method="get" th:action="@{/farm/}">
+            <button type="submit">Farma</button>
+        </form>
+    </div>
+    <!-- Sklep 1: Sprzedaż produktów -->
+    <div class="shop">
+        <h2>Sklep 1: Produkty</h2>
+        <p>Sprzedaj produkty w zamian za paszę:</p>
+        <form method="post" th:action="@{/market/sell-product}">
+            <button name="type" value="egg">Sprzedaj jajka (2 Niska pasza)</button>
+            <button name="type" value="wool">Sprzedaj wełnę (4 Średnia pasza)</button>
+            <button name="type" value="milk">Sprzedaj mleko (6 Wysoka pasza)</button>
+        </form>
+    </div>
+
+    <!-- Sklep 2: Zamiana paszy -->
+    <div class="shop">
+        <h2>Sklep 2: Pasza</h2>
+        <p>Zamień paszę na wyższej jakości:</p>
+        <form method="post" th:action="@{/market/exchange-feed}">
+            <button name="type" value="medium_quality">2 Niskiej → 1 Średnia</button>
+            <button name="type" value="high_quality">2 Średniej → 1 Wysoka</button>
+        </form>
+    </div>
+
+    <!-- Sklep 3: Wymiana zwierząt -->
+    <div class="shop">
+        <h2>Sklep 3: Wymiana zwierząt</h2>
+        <p>Wymień zwierzęta na lepsze:</p>
+        <form method="post" th:action="@{/market/exchange}">
+            <button name="type" value="chicken">5 królików → 1 kura</button>
+            <button name="type" value="sheep">4 kury → 1 owca</button>
+            <button name="type" value="cow">4 owce → 1 krowa</button>
+            <button name="type" value="horse">3 krowy → 1 koń</button>
+        </form>
+
+        <hr>
+        <p>Sprzedaj zwierzęta za paszę:</p>
+        <form method="post" th:action="@{/market/sell-animal}">
+            <button name="type" value="rabbit">Sprzedaj królika (1 Niska)</button>
+            <button name="type" value="chicken">Sprzedaj kurę (4 Niska)</button>
+            <button name="type" value="sheep">Sprzedaj owcę (8 Średnia)</button>
+            <button name="type" value="cow">Sprzedaj krowę (25 Wysoka)</button>
+            <button name="type" value="horse">Sprzedaj konia (40 Wysoka)</button>
+        </form>
+    </div>
+
+</div>
 
 </body>
 </html>
