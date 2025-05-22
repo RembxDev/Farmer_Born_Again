@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Nowy Poranek</title>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 30px; background-color: #fafafa; }
+
+    #log {
+      max-width: 600px;
+      margin: 20px auto;
+      text-align: left;
+      border: 1px solid #ccc;
+      padding: 10px;
+      background: #f3f3f3;
+      height: 200px;
+      overflow-y: auto;
+    }
+
+    .dice-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .dice {
+      font-size: 50px;
+      padding: 20px;
+      border: 2px solid #333;
+      border-radius: 10px;
+      background-color: #fff;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: rollDice 0.5s infinite ease-in-out;
+    }
+
+    @keyframes rollDice {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(90deg); }
+      50% { transform: rotate(180deg); }
+      75% { transform: rotate(270deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .static {
+      animation: none !important;
+    }
+
+    .clock {
+      margin: 30px auto;
+      border: 5px solid #333;
+      border-radius: 50%;
+      width: 150px;
+      height: 150px;
+      position: relative;
+    }
+
+    .hand {
+      width: 50%;
+      height: 4px;
+      background: #45fdff;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: 0%;
+      transform: rotate(-90deg);
+      transition: transform 1s linear;
+    }
+
+    .center-dot {
+      width: 10px;
+      height: 10px;
+      background: #333;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+    }
+  </style>
+  <script src="/js/timer.js"></script>
+</head>
+<body>
+
+<h1>🌄 Poranek na farmie</h1>
+<p>Trwa rzut kostkami i próba rozmnożenia zwierząt...</p>
+
+<div class="dice-container">
+  <div class="dice" id="dice1">🎲</div>
+  <div class="dice" id="dice2">🎲</div>
+  <div class="dice" id="dice3">🎲</div>
+</div>
+
+<div id="log"></div>
+
+<div class="clock">
+  <div class="hand" id="hand"></div>
+  <div class="center-dot"></div>
+</div>
+
+<p>Powrót do gry za <span id="countdown">15</span> sekund</p>
+
+<script>
+  const emojiMap = {
+    "rabbit": "🐰",
+    "sheep": "🐑",
+    "cow": "🐄",
+    "fox": "🦊"
+  };
+
+  function appendToLog(message) {
+    const logDiv = document.getElementById('log');
+    const entry = document.createElement('div');
+    entry.textContent = message;
+    logDiv.appendChild(entry);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+
+  function stopAnimationAndShowResults(diceResults) {
+    for (let i = 0; i < 3; i++) {
+      const dice = document.getElementById(`dice${i + 1}`);
+      dice.classList.add('static');
+      dice.textContent = emojiMap[diceResults[i]] || "❓";
+    }
+  }
+
+  async function startMorning() {
+    setTimeout(() => {
+      fetch('/farm/morning/process')
+              .then(response => response.json())
+              .then(data => {
+                if (data.diceResults && data.log) {
+                  stopAnimationAndShowResults(data.diceResults);
+                  data.log.forEach(msg => appendToLog(msg));
+                  startCountdown({
+                    seconds: 15,
+                    onCompleteRedirect: "/farm/",
+                    updateVisuals: true
+                  });
+                } else {
+                  appendToLog("❌ Błąd: Brak wyników kostek.");
+                }
+              })
+              .catch(error => {
+                console.error("Błąd podczas przetwarzania poranka:", error);
+                appendToLog("❌ Wystąpił błąd podczas ładowania poranka.");
+              });
+    }, 4000);
+  }
+
+  document.addEventListener('DOMContentLoaded', startMorning);
+</script>
+
+</body>
+</html>

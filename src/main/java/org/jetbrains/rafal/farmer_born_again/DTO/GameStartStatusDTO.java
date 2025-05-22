@@ -4,13 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class PlayerStatusDTO implements Serializable {
-
-    private String playerName;
-    private String status;
+@AllArgsConstructor
+public class GameStartStatusDTO {
+    private String type; // np. "GAME_STARTED"
+    private String message;
 }

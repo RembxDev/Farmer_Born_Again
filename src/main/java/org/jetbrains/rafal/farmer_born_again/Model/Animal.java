@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class Animal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     private String name;
     private int reproductionChance;
@@ -21,9 +21,20 @@ public class Animal {
     private int sellPrice;
     private boolean isSick;
     private boolean isFed;
+    private int feedLevel;
 
     @ManyToOne
     @JoinColumn(name = "player_id")
     private Player player;
 
+    Animal(String name, int reproductionChance, int foodRequirement, int sellPrice, Player player) {
+        this.name = name;
+        this.reproductionChance = reproductionChance;
+        this.foodRequirement = foodRequirement;
+        this.sellPrice = sellPrice;
+        this.isFed = false;
+        this.isSick = false;
+        this.feedLevel = 5;
+        this.player = player;
+    }
 }

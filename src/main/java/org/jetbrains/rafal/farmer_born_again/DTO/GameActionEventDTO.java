@@ -11,6 +11,7 @@ public class GameActionEventDTO {
 
     private String action;
     private String player;
-    private Long targetId;
+    private Integer targetId;
     private String description;
+    private Integer feedLevel;
 }

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>🌙 Noc na farmie</title>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 100px;
+      background-color: #1c1c1c;
+      color: white;
+      overflow: hidden;
+      position: relative;
+    }
+    h1 {
+      font-size: 36px;
+    }
+    .event {
+      margin-top: 40px;
+      font-size: 24px;
+    }
+    .desc {
+      font-size: 18px;
+      color: #ccc;
+    }
+
+    .clock {
+      margin: 50px auto;
+      border: 5px solid #ccc;
+      border-radius: 50%;
+      width: 150px;
+      height: 150px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hand {
+      width: 50%;
+      height: 4px;
+      background: #f00;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: 0%;
+      transform: rotate(-90deg);
+      transition: transform 1s linear;
+    }
+
+    .center-dot {
+      width: 10px;
+      height: 10px;
+      background: #ccc;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      opacity: 0;
+      z-index: 1;
+      transition: opacity 1s linear;
+    }
+  </style>
+  <script src="/js/timer.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => startCountdown({
+      seconds: 10,
+      onCompleteRedirect: "/farm/morning",
+      updateVisuals: true
+    }));
+  </script>
+</head>
+<body>
+<div id="overlay"></div>
+
+<h1>🌙 Zapadła noc...</h1>
+<div class="event">
+  <strong th:text=${eventName}>[Nazwa eventu]</strong>
+  <div class="desc" th:text=${eventDescription}>[Opis eventu]</div>
+</div>
+
+<div class="clock">
+  <div class="hand" id="hand"></div>
+  <div class="center-dot"></div>
+</div>
+
+<p style="margin-top: 20px;">Przejście do poranka za <span id="countdown">10</span> sekund</p>
+</body>
+</html>
