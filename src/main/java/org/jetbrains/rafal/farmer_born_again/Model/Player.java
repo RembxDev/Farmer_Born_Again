@@ -21,6 +21,8 @@ public class Player implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
+    boolean smallDog;
+    boolean bigDog;
 
     @ElementCollection
     @CollectionTable(name = "silo", joinColumns = @JoinColumn(name = "player_id"))
@@ -48,6 +50,7 @@ public class Player implements Serializable {
     public Player(String name){
         this.name = name;
         this.silo = new HashMap<>();
+        this.silo.put("grass", 10);
         this.silo.put("low_quality", 5);
         this.silo.put("medium_quality", 0);
         this.silo.put("high_quality", 0);
@@ -55,6 +58,8 @@ public class Player implements Serializable {
         this.products = new ArrayList<>();
         this.ready = false;
         this.finishedTurn = false;
+        this.smallDog = false;
+        this.bigDog = false;
     }
 }
 

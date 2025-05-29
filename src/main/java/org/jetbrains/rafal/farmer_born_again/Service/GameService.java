@@ -208,30 +208,92 @@ public class GameService {
             );
         }
 
-        List<String> possibleTypes = List.of("rabbit","chicken", "sheep", "cow", "fox");
+        Map<String, Integer> weightedTypes = Map.of(
+                "rabbit", 35,
+                "chicken", 25,
+                "sheep", 15,
+                "cow", 15,
+                "fox", 5,
+                "wolf", 5
+        );
+
+        List<String> possibleTypes = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : weightedTypes.entrySet()) {
+            for (int i = 0; i < entry.getValue(); i++) {
+                possibleTypes.add(entry.getKey());
+            }
+        }
+
         Random rand = new Random();
+        Map<String, Integer> diceCounts = new HashMap<>();
+
 
         for (int i = 0; i < 3; i++) {
             String rolledType = possibleTypes.get(rand.nextInt(possibleTypes.size()));
             diceResults.add(rolledType);
             log.add("🎲 Rzut #" + (i + 1) + ": " + rolledType);
+            diceCounts.put(rolledType, diceCounts.getOrDefault(rolledType, 0) + 1);
+        }
 
-            if (rolledType.equals("fox")) {
-                log.add("🦊 Lis zakradł się na farmę... (ale jeszcze nie robi nic)");
+        if (diceCounts.containsKey("fox")) {
+            log.add("🦊 Lis zakradł się na farmę!");
+            double foxChance = player.isSmallDog() ? 5 : 90;
+            log.add("🛡️ Szansa na zjedzenie królika i kury: " + foxChance + "%");
+
+            Iterator<Animal> it = playerAnimals.iterator();
+            while (it.hasNext()) {
+                Animal a = it.next();
+                if (a.getName().equals("rabbit") || a.getName().equals("chicken")) {
+                    if (rand.nextInt(100) < foxChance) {
+                        log.add("❌ Lis pożarł: " + a.getName() + " (ID: " + a.getId() + ")");
+                        it.remove();
+                    }
+                }
+            }
+        }
+
+        if (diceCounts.containsKey("wolf")) {
+            log.add("🐺 Wilk zakradł się na farmę!");
+            double wolfChance = player.isBigDog() ? 5 : 90;
+            log.add("🛡️ Szansa na zjedzenie owcy i krowy: " + wolfChance + "%");
+
+            Iterator<Animal> it = playerAnimals.iterator();
+            while (it.hasNext()) {
+                Animal a = it.next();
+                if (a.getName().equals("sheep") || a.getName().equals("cow")) {
+                    if (rand.nextInt(100) < wolfChance) {
+                        log.add("❌ Wilk pożarł: " + a.getName() + " (ID: " + a.getId() + ")");
+                        it.remove();
+                    }
+                }
+            }
+        }
+
+        for (String type : diceCounts.keySet()) {
+
+            long validCount = playerAnimals.stream()
+                    .filter(a -> a.getName().equals(type) && !a.isSick() && a.getFeedLevel() >= 3)
+                    .count();
+
+            int total = (int) validCount + diceCounts.get(type);
+            int pairs = total / 2;
+
+            if (pairs == 0) {
+                log.add("⚠️ Za mało zdrowych i najedzonych " + type + " do rozmnażania.");
                 continue;
             }
 
-            long validCount = playerAnimals.stream()
-                    .filter(a -> a.getName().equals(rolledType) && !a.isSick() && a.getFeedLevel() >= 4)
-                    .count();
+            Animal template = playerAnimals.stream()
+                    .filter(a -> a.getName().equals(type))
+                    .findFirst()
+                    .orElse(null);
 
-            if (validCount >= 2) {
-                Animal template = playerAnimals.stream()
-                        .filter(a -> a.getName().equals(rolledType))
-                        .findFirst()
-                        .orElse(null);
-
-                if (template != null && rand.nextInt(100) < template.getReproductionChance()) {
+            if (template == null) {
+                log.add("❌ Błąd: nie znaleziono wzorca zwierzęcia do rozmnażania.");
+                continue;
+            }
+            for (int i = 0; i < pairs; i++) {
+                if (rand.nextInt(100) < template.getReproductionChance()) {
                     Animal baby = animalService.createAnimal(
                             template.getName(),
                             template.getReproductionChance(),
@@ -242,12 +304,9 @@ public class GameService {
 
                     player.getAnimals().add(baby);
                     log.add("✨ Nowe zwierzę urodziło się: " + baby.getName() + " (ID: " + baby.getId() + ")");
-
                 } else {
-                    log.add("❌ Nie udało się rozmnożyć " + rolledType);
+                    log.add("❌ Nie udało się rozmnożyć " + type);
                 }
-            } else {
-                log.add("⚠️ Za mało zdrowych i najedzonych " + rolledType + " do rozmnażania.");
             }
         }
 

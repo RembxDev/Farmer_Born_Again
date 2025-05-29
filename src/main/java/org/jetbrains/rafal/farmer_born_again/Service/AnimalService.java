@@ -80,7 +80,7 @@ public class AnimalService {
 
         String siloKey;
         switch (target.getFoodRequirement()) {
-            case 0 -> siloKey = null;
+            case 0 -> siloKey = "grass";
             case 1 -> siloKey = "low_quality";
             case 2 -> siloKey = "medium_quality";
             default -> siloKey = "high_quality";
