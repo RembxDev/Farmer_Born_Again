@@ -58,7 +58,7 @@ public class GameController {
                     "winner", player.getName()
             ));
 
-            return "redirect:/game/finished";
+            return "redirect:/farm/game/finished";
         }
 
 

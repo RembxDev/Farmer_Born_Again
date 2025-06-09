@@ -61,6 +61,9 @@ function connectGame() {
             } else if (status.type === "DAY_TIME") {
                 console.log("Można zacząć Dzień!");
                 window.location.href = "/farm/";
+            } else if (status.type === "GAME_OVER") {
+                alert("🏆 Gra zakończona! Wygrał " + status.winner);
+                window.location.href = "/farm/game/finished";
             }
         });
     });
@@ -151,14 +154,6 @@ function toggleReadyButtonText(isFinished) {
         ? "⬅️ Cofnij zakończenie tury"
         : "✅ Zakończ turę";
 }
-
-stompClient.subscribe('/topic/game/' + gameId + '/endTurn', function(message) {
-    const status = JSON.parse(message.body);
-    if (status.type === "GAME_OVER") {
-        alert("🏆 Gra zakończona! Wygrał " + status.winner);
-        window.location.href = "/game/finished";
-    }
-});
 
 // DOM READY
 document.addEventListener("DOMContentLoaded", () => {
