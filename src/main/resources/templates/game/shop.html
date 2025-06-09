@@ -163,6 +163,25 @@
         </form>
     </div>
 
+    <!-- Sklep 6: Weterynarz -->
+    <div class="shop">
+        <h2>🩺 Weterynarz</h2>
+        <p th:text="'Chore zwierzęta: ' + ${sickAnimalCount}"></p>
+        <div th:if="${sickAnimalCount > 0}">
+            <p th:each="cost : ${healingCosts}"
+               th:text="${cost.value} + ' x ' + ${cost.key.replace('low_quality', 'Niska').replace('medium_quality', 'Średnia').replace('high_quality', 'Wysoka')}"></p>
+        </div>
+        <p th:if="${sickAnimalCount == 0}">
+            Brak chorych zwierząt.
+        </p>
+        <form method="post" th:action="@{/market/heal-animals}">
+            <button th:disabled="${sickAnimalCount == 0}"
+                    th:class="${sickAnimalCount == 0} ? 'disabled' : ''">
+                Wylecz zwierzęta
+            </button>
+        </form>
+    </div>
+
 </div>
 
 </body>

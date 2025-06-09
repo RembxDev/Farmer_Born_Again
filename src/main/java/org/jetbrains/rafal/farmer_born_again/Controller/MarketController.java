@@ -26,7 +26,10 @@ public class MarketController {
     public String showMarket(HttpSession session, Model model) {
         Player player = (Player) session.getAttribute("player");
         if (player == null) return "redirect:/";
+        HealingCostResult healingCostResult = calculateHealingCosts(player);
         model.addAttribute("player", player);
+        model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+        model.addAttribute("healingCosts", healingCostResult.costs());
         return "game/shop";
     }
 
@@ -49,8 +52,10 @@ public class MarketController {
 
         Product product = optional.get();
         if (product.getQuantity() < quantity) {
-            model.addAttribute("message", "Za mało produktu.");
+            HealingCostResult healingCostResult = calculateHealingCosts(player);
             model.addAttribute("player", player);
+            model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+            model.addAttribute("healingCosts", healingCostResult.costs());
             return "game/shop";
         }
 
@@ -69,7 +74,10 @@ public class MarketController {
         player.getSilo().merge("low_quality", earned, Integer::sum);
 
         model.addAttribute("message", "Sprzedano za " + earned + " paszy niskiej jakości.");
+        HealingCostResult healingCostResult = calculateHealingCosts(player);
         model.addAttribute("player", player);
+        model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+        model.addAttribute("healingCosts", healingCostResult.costs());
         return "game/shop";
     }
 
@@ -89,14 +97,20 @@ public class MarketController {
         String currency = costMap.get(type);
         if (currency == null) {
             model.addAttribute("message", "Nieznany typ paszy.");
+            HealingCostResult healingCostResult = calculateHealingCosts(player);
             model.addAttribute("player", player);
+            model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+            model.addAttribute("healingCosts", healingCostResult.costs());
             return "game/shop";
         }
 
         int available = player.getSilo().getOrDefault(currency, 0);
         if (available < quantity * 2) {
             model.addAttribute("message", "Za mało paszy: " + currency);
+            HealingCostResult healingCostResult = calculateHealingCosts(player);
             model.addAttribute("player", player);
+            model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+            model.addAttribute("healingCosts", healingCostResult.costs());
             return "game/shop";
         }
 
@@ -104,7 +118,10 @@ public class MarketController {
         player.getSilo().merge(type, quantity, Integer::sum);
 
         model.addAttribute("message", "Kupiono " + quantity + "x " + type + " za " + (quantity * 2) + " " + currency);
+        HealingCostResult healingCostResult = calculateHealingCosts(player);
         model.addAttribute("player", player);
+        model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+        model.addAttribute("healingCosts", healingCostResult.costs());
         return "game/shop";
     }
 
@@ -122,11 +139,11 @@ public class MarketController {
         );
 
         Map<String, AnimalData> animalData = Map.of(
-                "rabbit", new AnimalData(80, 0, 1),
-                "chicken", new AnimalData(60, 1, 4),
-                "sheep", new AnimalData(50, 2, 8),
-                "cow", new AnimalData(40, 3, 25),
-                "horse", new AnimalData(10, 4, 40)
+                "rabbit", new AnimalData(80, 0, 1, 1, "low_quality"),
+                "chicken", new AnimalData(60, 1, 4, 2, "low_quality"),
+                "sheep", new AnimalData(50, 2, 8, 4, "medium_quality"),
+                "cow", new AnimalData(40, 3, 25, 13, "high_quality"),
+                "horse", new AnimalData(10, 3, 40, 20, "high_quality")
         );
 
         ExchangeRule rule = exchangeRules.get(type);
@@ -134,7 +151,10 @@ public class MarketController {
 
         if (rule == null || data == null) {
             model.addAttribute("message", "Nieznana wymiana.");
+            HealingCostResult healingCostResult = calculateHealingCosts(player);
             model.addAttribute("player", player);
+            model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+            model.addAttribute("healingCosts", healingCostResult.costs());
             return "game/shop";
         }
 
@@ -144,7 +164,10 @@ public class MarketController {
 
         if (count < rule.required) {
             model.addAttribute("message", "Za mało " + rule.source + " do wymiany.");
+            HealingCostResult healingCostResult = calculateHealingCosts(player);
             model.addAttribute("player", player);
+            model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+            model.addAttribute("healingCosts", healingCostResult.costs());
             return "game/shop";
         }
 
@@ -169,7 +192,10 @@ public class MarketController {
         player.getAnimals().add(newAnimal);
 
         model.addAttribute("message", "Wymieniono na nowe zwierzę: " + type);
+        HealingCostResult healingCostResult = calculateHealingCosts(player);
         model.addAttribute("player", player);
+        model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+        model.addAttribute("healingCosts", healingCostResult.costs());
         return "game/shop";
     }
 
@@ -180,17 +206,18 @@ public class MarketController {
         Player player = (Player) session.getAttribute("player");
 
         Map<String, AnimalData> animalData = Map.of(
-                "rabbit", new AnimalData(80, 0, 1),
-                "chicken", new AnimalData(60, 1, 4),
-                "sheep", new AnimalData(50, 2, 8),
-                "cow", new AnimalData(40, 3, 25),
-                "horse", new AnimalData(10, 4, 40)
+                "rabbit", new AnimalData(80, 0, 1, 1, "low_quality"),
+                "chicken", new AnimalData(60, 1, 4, 2, "low_quality"),
+                "sheep", new AnimalData(50, 2, 8, 4, "medium_quality"),
+                "cow", new AnimalData(40, 3, 25, 13, "high_quality"),
+                "horse", new AnimalData(10, 3, 40, 20, "high_quality")
         );
 
         AnimalData data = animalData.get(type);
         if (data == null) {
             model.addAttribute("message", "Nieznane zwierzę.");
             model.addAttribute("player", player);
+            model.addAttribute("healingCosts", calculateHealingCosts(player));
             return "game/shop";
         }
 
@@ -200,7 +227,10 @@ public class MarketController {
 
         if (optional.isEmpty()) {
             model.addAttribute("message", "Nie masz takiego zwierzęcia.");
+            HealingCostResult healingCostResult = calculateHealingCosts(player);
             model.addAttribute("player", player);
+            model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+            model.addAttribute("healingCosts", healingCostResult.costs());
             return "game/shop";
         }
 
@@ -218,7 +248,10 @@ public class MarketController {
         player.getSilo().merge(feedType, price, Integer::sum);
 
         model.addAttribute("message", "Sprzedano " + type + " za " + price + " (" + feedType + ")");
+        HealingCostResult healingCostResult = calculateHealingCosts(player);
         model.addAttribute("player", player);
+        model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+        model.addAttribute("healingCosts", healingCostResult.costs());
         return "game/shop";
     }
 
@@ -261,7 +294,10 @@ public class MarketController {
             model.addAttribute("message", "❌ Brak dostępnego produktu: " + type);
         }
 
+        HealingCostResult healingCostResult = calculateHealingCosts(player);
         model.addAttribute("player", player);
+        model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+        model.addAttribute("healingCosts", healingCostResult.costs());
         return "game/shop";
     }
 
@@ -277,21 +313,30 @@ public class MarketController {
         DogData data = dogData.get(type);
         if (data == null) {
             model.addAttribute("message", "❌ Nieznany typ psa.");
+            HealingCostResult healingCostResult = calculateHealingCosts(player);
             model.addAttribute("player", player);
+            model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+            model.addAttribute("healingCosts", healingCostResult.costs());
             return "game/shop";
         }
 
         boolean alreadyOwned = ("small_dog".equals(type) && player.isSmallDog()) || ("big_dog".equals(type) && player.isBigDog());
         if (alreadyOwned) {
             model.addAttribute("message", "❌ Już posiadasz " + data.name + "!");
+            HealingCostResult healingCostResult = calculateHealingCosts(player);
             model.addAttribute("player", player);
+            model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+            model.addAttribute("healingCosts", healingCostResult.costs());
             return "game/shop";
         }
 
         int highQualityFeed = player.getSilo().getOrDefault("high_quality", 0);
         if (highQualityFeed < data.cost) {
             model.addAttribute("message", "❌ Za mało paszy wysokiej jakości.");
+            HealingCostResult healingCostResult = calculateHealingCosts(player);
             model.addAttribute("player", player);
+            model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+            model.addAttribute("healingCosts", healingCostResult.costs());
             return "game/shop";
         }
 
@@ -303,8 +348,104 @@ public class MarketController {
         }
 
         model.addAttribute("message", "✅ Zakupiono " + data.name + " za " + data.cost + " paszy wysokiej jakości!");
+        HealingCostResult healingCostResult = calculateHealingCosts(player);
         model.addAttribute("player", player);
+        model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+        model.addAttribute("healingCosts", healingCostResult.costs());
         return "game/shop";
+    }
+
+    @PostMapping("/heal-animals")
+    public String healAnimals(HttpSession session, Model model) {
+        Player player = (Player) session.getAttribute("player");
+
+        Map<String, AnimalData> animalData = Map.of(
+                "rabbit", new AnimalData(80, 0, 1, 1, "low_quality"),
+                "chicken", new AnimalData(60, 1, 4, 2, "low_quality"),
+                "sheep", new AnimalData(50, 2, 8, 4, "medium_quality"),
+                "cow", new AnimalData(40, 3, 25, 13, "high_quality"),
+                "horse", new AnimalData(10, 3, 40, 20, "high_quality")
+        );
+
+        Map<String, Integer> healingCosts = new HashMap<>();
+        long sickAnimalCount = player.getAnimals().stream()
+                .filter(Animal::isSick)
+                .peek(animal -> {
+                    AnimalData data = animalData.get(animal.getName().toLowerCase());
+                    if (data != null) {
+                        int cost = applyPriceBonus(data.healingCost(), player.getGame().getPriceBonus());
+                        healingCosts.merge(data.feedType(), cost, Integer::sum);
+                    }
+                })
+                .count();
+
+        if (sickAnimalCount == 0) {
+            model.addAttribute("message", "❌ Brak chorych zwierząt do wyleczenia.");
+            model.addAttribute("player", player);
+            model.addAttribute("sickAnimalCount", 0);
+            model.addAttribute("healingCosts", new HashMap<String, Integer>());
+            return "game/shop";
+        }
+
+        for (Map.Entry<String, Integer> entry : healingCosts.entrySet()) {
+            String feedType = entry.getKey();
+            int required = entry.getValue();
+            int available = player.getSilo().getOrDefault(feedType, 0);
+            if (available < required) {
+                model.addAttribute("message", "❌ Za mało paszy: " + feedType.replace("_", " ") + ". Potrzeba: " + required);
+                model.addAttribute("player", player);
+                model.addAttribute("sickAnimalCount", sickAnimalCount);
+                model.addAttribute("healingCosts", healingCosts);
+                return "game/shop";
+            }
+        }
+
+        for (Map.Entry<String, Integer> entry : healingCosts.entrySet()) {
+            String feedType = entry.getKey();
+            int required = entry.getValue();
+            player.getSilo().merge(feedType, -required, Integer::sum);
+        }
+        player.getAnimals().stream()
+                .filter(Animal::isSick)
+                .forEach(animal -> animal.setSick(false));
+
+        StringBuilder costMessage = new StringBuilder();
+        healingCosts.forEach((feedType, amount) ->
+                costMessage.append(amount).append(" ").append(feedType.replace("_", " ")).append(", "));
+        if (costMessage.length() > 0) {
+            costMessage.setLength(costMessage.length() - 2);
+        }
+
+        model.addAttribute("message", "✅ Wyleczono " + sickAnimalCount + " zwierząt za " + costMessage + " paszy!");
+        model.addAttribute("player", player);
+        model.addAttribute("sickAnimalCount", 0);
+        model.addAttribute("healingCosts", new HashMap<String, Integer>());
+        return "game/shop";
+    }
+
+
+    private HealingCostResult  calculateHealingCosts(Player player) {
+        Map<String, AnimalData> animalData = Map.of(
+                "rabbit", new AnimalData(80, 0, 1, 1, "low_quality"),
+                "chicken", new AnimalData(60, 1, 4, 2, "low_quality"),
+                "sheep", new AnimalData(50, 2, 8, 4, "medium_quality"),
+                "cow", new AnimalData(40, 3, 25, 13, "high_quality"),
+                "horse", new AnimalData(10, 3, 40, 20, "high_quality")
+        );
+
+        Map<String, Integer> healingCosts = new HashMap<>();
+        long sickAnimalCount = player.getAnimals().stream()
+                .filter(Animal::isSick)
+                .peek(animal -> {
+                    AnimalData data = animalData.get(animal.getName().toLowerCase());
+                    if (data != null) {
+                        int cost = applyPriceBonus(data.healingCost(), player.getGame().getPriceBonus());
+                        healingCosts.merge(data.feedType(), cost, Integer::sum);
+                    }
+                })
+                .count();
+
+        return new HealingCostResult(sickAnimalCount, healingCosts);
     }
 
     private int applyPriceBonus(int basePrice, int bonusPercent) {
@@ -313,6 +454,7 @@ public class MarketController {
     }
 
     private record ExchangeRule(String source, int required) {}
-    private record AnimalData(int reproductionChance, int foodRequirement, int sellPrice) {}
+    private record AnimalData(int reproductionChance, int foodRequirement, int sellPrice, int healingCost, String feedType) {}
     private record DogData(int cost, String name) {}
+    private record HealingCostResult(long sickAnimalCount, Map<String, Integer> costs) {}
 }
