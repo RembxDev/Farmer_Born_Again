@@ -26,6 +26,7 @@ public class MarketController {
     public String showMarket(HttpSession session, Model model) {
         Player player = (Player) session.getAttribute("player");
         if (player == null) return "redirect:/";
+        if(player.getGame().isMarketLock()) return "redirect:/farm/";
         HealingCostResult healingCostResult = calculateHealingCosts(player);
         model.addAttribute("player", player);
         model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
@@ -83,10 +84,10 @@ public class MarketController {
 
     @PostMapping("/buy-feed")
     public String buyFeed(@RequestParam String type,
-                          @RequestParam int quantity,
                           HttpSession session,
                           Model model) {
 
+        int quantity = 1;
         Player player = (Player) session.getAttribute("player");
 
         Map<String, String> costMap = Map.of(

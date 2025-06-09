@@ -180,9 +180,6 @@
     </li>
 </ul>
 
-<h3>Log sesji gry:</h3>
-<div id="gameLog"></div>
-
 <h3>Twoje zwierzęta:</h3>
 <div th:each="entry : ${groupedAnimals}">
     <div class="group-header">
@@ -209,6 +206,20 @@
     </div>
 </div>
 
+<h3>Twoje psy:</h3>
+<div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+    <div class="dog-card">
+        <div style="font-size: 18px;">
+            🐕 Mały pies: <span th:text="${player.isSmallDog()} ? 'Posiadasz' : 'Brak'"></span>
+        </div>
+    </div>
+    <div class="dog-card">
+        <div style="font-size: 18px;">
+            🐕‍🦺 Duży pies: <span th:text="${player.isBigDog()} ? 'Posiadasz' : 'Brak'"></span>
+        </div>
+    </div>
+</div>
+
 <h3>Twoje produkty:</h3>
 <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
     <div th:each="product : ${player.products}" class="product-card">
@@ -218,9 +229,12 @@
     </div>
 </div>
 
+<h3>Log sesji gry:</h3>
+<div id="gameLog"></div>
+
 <div>
     <form action="/market" method="get" style="display:inline;">
-        <button type="submit">🏪 Rynek</button>
+        <button type="submit" th:class="${player.getGame().isMarketLock()} ? 'disabled' : ''">🏪 Rynek</button>
     </form>
     <button id="readyButton" onclick="markReady()">✅ Zakończ turę</button>
     <p id="turnStatus" style="font-weight: bold; color: #555;">Zakończyło turę: 0/2</p>

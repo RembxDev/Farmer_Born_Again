@@ -35,7 +35,7 @@ public class Event {
                 for (Player p : game.getPlayers()) {
                     p.getAnimals().stream()
                             .filter(a -> !a.isSick())
-                            .limit(2)
+                            .limit(p.getAnimals().size()/2)
                             .forEach(a -> a.setSick(true));
                 }
             }
