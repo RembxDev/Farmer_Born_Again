@@ -22,6 +22,7 @@ public class Animal {
     private boolean isSick;
     private boolean isFed;
     private int feedLevel;
+    private int turnCounter = 0;
 
     @ManyToOne
     @JoinColumn(name = "player_id")
@@ -35,6 +36,7 @@ public class Animal {
         this.isFed = false;
         this.isSick = false;
         this.feedLevel = 5;
+        this.turnCounter = 0;
         this.player = player;
     }
 }

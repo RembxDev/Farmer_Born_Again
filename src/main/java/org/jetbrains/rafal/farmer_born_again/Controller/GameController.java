@@ -1,12 +1,10 @@
 package org.jetbrains.rafal.farmer_born_again.Controller;
 
 import jakarta.servlet.http.HttpSession;
-import lombok.AllArgsConstructor;
-import org.jetbrains.rafal.farmer_born_again.Model.Event;
+import org.jetbrains.rafal.farmer_born_again.Model.Animal;
 import org.jetbrains.rafal.farmer_born_again.Model.Game;
 import org.jetbrains.rafal.farmer_born_again.Model.Player;
 import org.jetbrains.rafal.farmer_born_again.Service.GameService;
-import org.jetbrains.rafal.farmer_born_again.Service.PlayerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -16,12 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-
-import static org.jetbrains.rafal.farmer_born_again.Model.Game.NightEventType.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/farm")
@@ -46,10 +41,20 @@ public class GameController {
 
         Game game = player.getGame();
         game.setCurrentPhase(Game.Phase.DAY);
+
+        List<Animal> animals = player.getAnimals();
+        Map<String, List<Animal>> groupedAnimals = animals.stream()
+                .collect(Collectors.groupingBy(Animal::getName));
+
+        long sickCount = animals.stream().filter(Animal::isSick).count();
+        int percentage = animals.isEmpty() ? 0 : (int) ((double) sickCount * 100 / animals.size());
+
         model.addAttribute("eventName", formatEventName(game.getCurrentEvent()));
         model.addAttribute("player", player);
         model.addAttribute("game", game);
         model.addAttribute("silo", player.getSilo());
+        model.addAttribute("groupedAnimals", groupedAnimals);
+        model.addAttribute("sickPercentage", percentage);
         return "game/farm";
     }
 
@@ -100,7 +105,7 @@ public class GameController {
             );
         }
 
-        return gameService.handleMorningPhase(player);
+        return gameService.animalsRoll(player);
     }
 
     public String formatEventName(Game.NightEventType type) {

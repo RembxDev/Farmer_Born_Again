@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,4 +16,6 @@ public class GameActionEventDTO {
     private Integer targetId;
     private String description;
     private Integer feedLevel;
+    private Map<String, Object> extra;
+
 }

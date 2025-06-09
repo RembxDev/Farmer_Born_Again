@@ -7,10 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Data
 @NoArgsConstructor
@@ -49,7 +46,7 @@ public class Player implements Serializable {
 
     public Player(String name){
         this.name = name;
-        this.silo = new HashMap<>();
+        this.silo = new LinkedHashMap<>();
         this.silo.put("grass", 10);
         this.silo.put("low_quality", 5);
         this.silo.put("medium_quality", 0);

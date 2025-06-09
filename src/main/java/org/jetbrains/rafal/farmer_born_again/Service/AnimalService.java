@@ -116,6 +116,13 @@ public class AnimalService {
         return animal;
     }
 
-
+    public Animal getBaseAnimal(String name) {
+        return switch (name) {
+            case "rabbit" -> createAnimal("rabbit", 80, 0, 1, null);
+            case "chicken" -> createAnimal("chicken", 60, 1, 4, null);
+            case "sheep" -> createAnimal("sheep", 50, 2, 8, null);
+            default -> createAnimal("cow", 40, 3, 25, null);
+        };
+    }
 }
 

@@ -18,7 +18,16 @@ function connectGame() {
             if (event.action === "FEED_ANIMAL" && event.feedLevel !== undefined && event.targetId !== undefined) {
                 const feedSpan = document.getElementById("feedLevel-" + event.targetId);
                 if (feedSpan) {
-                    feedSpan.textContent = event.feedLevel;
+                    feedSpan.innerHTML = "🍗".repeat(event.feedLevel) + "▫️".repeat(5 - event.feedLevel);
+                }
+
+                if (event.extra && event.extra.siloKey && event.extra.siloValue !== undefined) {
+                    const key = event.extra.siloKey;
+                    const val = event.extra.siloValue;
+                    const feedSiloSpan = document.getElementById("silo-" + key);
+                    if (feedSiloSpan) {
+                        feedSiloSpan.textContent = val;
+                    }
                 }
             }
 
@@ -70,6 +79,15 @@ function feedAnimal(animalId) {
 
     console.log("🔼 Wysyłam akcję karmienia:", actionEvent);
     stompClient.send("/app/game/" + gameId + "/action", {}, JSON.stringify(actionEvent));
+}
+
+function feedMultipleAnimals(ids) {
+    ids.forEach(id => feedAnimal(id));
+}
+
+function toggleAnimalGroup(animalType) {
+    const el = document.getElementById("group-" + animalType);
+    if (el) el.style.display = el.style.display === "none" ? "block" : "none";
 }
 
 function addGameLog(message) {

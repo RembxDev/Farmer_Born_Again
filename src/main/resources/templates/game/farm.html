@@ -30,29 +30,64 @@
 <p>Witaj, <span id="playerName" th:text="${player.getName()}"></span>!</p>
 <span id="gameId" th:text="${game.getId()}" style="display:none;"></span>
 <p th:text="'🌟 Aktualny Event: ' + ${eventName}"></p>
-<div th:each="feed : ${silo}">
-    <span th:text="${feed.getKey()}"></span>
-    <span th:text="${feed.getValue().toString()}"></span>
-</div>
+
+<h3>Silos paszy:</h3>
+<ul style="list-style: none; padding: 0; margin-bottom: 20px;">
+    <li th:each="feed : ${silo}" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 12px; border-bottom: 1px solid #ddd;">
+        <span style="font-size: 16px;">
+            <span th:switch="${feed.getKey()}">
+                <span th:case="'grass'">🌿 Trawa</span>
+                <span th:case="'low_quality'">🥕 Pasza niskiej jakości</span>
+                <span th:case="'medium_quality'">🌽 Pasza średniej jakości</span>
+                <span th:case="'high_quality'">🌾 Pasza wysokiej jakości</span>
+                <span th:case="*"><span th:text="${feed.getKey()}"></span></span>
+            </span>
+        </span>
+        <span style="font-weight: bold;" th:attr="id='silo-' + ${feed.getKey()}" th:text="${feed.getValue()}"></span>
+    </li>
+</ul>
+
+
+
 <h3>Log sesji gry:</h3>
 <div id="gameLog">
 
 </div>
 
 <h3>Twoje zwierzęta:</h3>
+<div th:each="entry : ${groupedAnimals}" style="margin-bottom: 15px;">
+    <div th:attr="onclick='toggleAnimalGroup(\'' + ${entry.key} + '\')'"
+         style="cursor: pointer; background: #eef; padding: 10px; border-radius: 8px;">
+        <strong>🐾 <span th:text="${entry.key}">Typ</span></strong>
+        – 👥 <span th:text="${#lists.size(entry.value)}">0</span> szt.
+        – 🤒 <span th:text="${sickPercentage + '%'}">0%</span>
+        <button type="button" th:inline="javascript"
+                th:attr="onclick='feedMultipleAnimals([[${entry.value.^![id]}]])'">
+            🍽️ Nakarm wszystkie
+        </button>
+    </div>
+
+    <div th:attr="id='group-' + ${entry.key}"
+         style="display: none; margin-left: 20px; margin-top: 8px;">
+        <div th:each="animal : ${entry.value}"
+             style="border: 1px solid #ccc; padding: 8px; margin-top: 6px; border-radius: 8px;">
+            🆔 <span th:text="${animal.id}">ID</span> –
+            <span th:text="${animal.sick} ? '🤒 Chory' : '💪 Zdrowy'"></span> –
+            <span th:attr="id='feedLevel-' + ${animal.id}" th:utext="${'🍗'.repeat(animal.feedLevel) + '▫️'.repeat(5 - animal.feedLevel)}"></span>
+            <button th:attr="onclick='feedAnimal(' + ${animal.id} + ')'" style="margin-left: 10px;">🍽️</button>
+        </div>
+    </div>
+</div>
+
+
+
+<h3>Twoje produkty:</h3>
 <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
-    <div th:each="animal : ${player.animals}"
-         style="border: 1px solid #ccc; padding: 10px; border-radius: 10px; background-color: #fff; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); min-width: 160px;">
-        <div style="font-size: 24px;">
-            🐾 <span th:text="${animal.name}"></span>
-            <small>(ID: <span th:text="${animal.id}"></span>)</small>
+    <div th:each="product : ${player.products}"
+         style="border: 1px solid #ccc; padding: 10px; border-radius: 10px; background-color: #f0f0f0; min-width: 120px;">
+        <div style="font-size: 18px;">
+            📦 <span th:text="${product.name}"></span> x<span th:text="${product.quantity}"></span>
         </div>
-        <div>
-            🍗 Poziom sytości:
-            <span th:text="${animal.feedLevel}" th:attr="id='feedLevel-' + ${animal.id}">0</span>/5
-        </div>
-        <div th:text="${animal.sick} ? '🤒 Chory' : '💪 Zdrowy'"></div>
-        <button th:attr="onclick='feedAnimal(' + ${animal.id} + ')'" style="margin-top: 10px;">🍽️ Nakarm</button>
     </div>
 </div>
 

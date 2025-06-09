@@ -4,12 +4,8 @@ import lombok.AllArgsConstructor;
 import org.jetbrains.rafal.farmer_born_again.DTO.GameActionEventDTO;
 import org.jetbrains.rafal.farmer_born_again.DTO.GameStartStatusDTO;
 import org.jetbrains.rafal.farmer_born_again.DTO.PlayerStatusDTO;
-import org.jetbrains.rafal.farmer_born_again.Model.Animal;
-import org.jetbrains.rafal.farmer_born_again.Model.Event;
-import org.jetbrains.rafal.farmer_born_again.Model.Game;
-import org.jetbrains.rafal.farmer_born_again.Model.Player;
+import org.jetbrains.rafal.farmer_born_again.Model.*;
 import org.jetbrains.rafal.farmer_born_again.Repository.GameRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -66,11 +62,11 @@ public class GameService {
 
             Animal rabbit1 = animalService.createAnimal("rabbit", 80, 0, 1, player);
             Animal rabbit2 = animalService.createAnimal("rabbit", 80, 0, 1, player);
-            Animal chicken = animalService.createAnimal("chicken", 80, 1, 1, player);
+            //Animal chicken = animalService.createAnimal("chicken", 80, 1, 1, player);
             player.setAnimals(new ArrayList<>());
             player.getAnimals().add(rabbit1);
             player.getAnimals().add(rabbit2);
-            player.getAnimals().add(chicken);
+            //player.getAnimals().add(chicken);
         } else {
             player.setGame(game);
         }
@@ -195,18 +191,45 @@ public class GameService {
         return game.getPlayers().stream().allMatch(Player::isFinishedTurn);
     }
 
-    public Map<String, Object> handleMorningPhase(Player player) {
+    public void generateAnimalProducts(Player player, List<String> log) {
+        List<Animal> animals = player.getAnimals();
+
+        for (Animal animal : animals) {
+            animal.setTurnCounter(animal.getTurnCounter() + 1);
+
+            if (animal.isSick() || animal.getFeedLevel() < 3) continue;
+
+            String productName = switch (animal.getName()) {
+                case "cow" -> "milk";
+                case "sheep" -> "wool";
+                case "chicken" -> "egg";
+                default -> null;
+            };
+
+            if (productName != null) {
+                Optional<Product> existing = player.getProducts().stream()
+                        .filter(p -> p.getName().equals(productName))
+                        .findFirst();
+
+                if (existing.isPresent()) {
+                    existing.get().setQuantity(existing.get().getQuantity() + 1);
+                } else {
+                    player.getProducts().add(new Product(null, productName, 1, player));
+                }
+
+                log.add("🧺 " + productName + " wyprodukowany przez: " + animal.getName() + " (ID: " + animal.getId() + ")");
+                animal.setTurnCounter(0);
+            }
+        }
+    }
+
+    public Map<String, Object> animalsRoll(Player player) {
         List<String> log = new ArrayList<>();
         List<String> diceResults = new ArrayList<>();
 
+        generateAnimalProducts(player, log);
+
         List<Animal> playerAnimals = player.getAnimals();
-        if (playerAnimals == null || playerAnimals.isEmpty()) {
-            log.add("Brak zwierząt na farmie.");
-            return Map.of(
-                    "log", log,
-                    "diceResults", List.of()
-            );
-        }
 
         Map<String, Integer> weightedTypes = Map.of(
                 "rabbit", 35,
@@ -278,7 +301,7 @@ public class GameService {
             int total = (int) validCount + diceCounts.get(type);
             int pairs = total / 2;
 
-            if (pairs == 0) {
+            if (pairs == 0 || type.equals("fox") || type.equals("wolf")) {
                 log.add("⚠️ Za mało zdrowych i najedzonych " + type + " do rozmnażania.");
                 continue;
             }
@@ -286,10 +309,10 @@ public class GameService {
             Animal template = playerAnimals.stream()
                     .filter(a -> a.getName().equals(type))
                     .findFirst()
-                    .orElse(null);
+                    .orElseGet(() -> animalService.getBaseAnimal(type));
 
             if (template == null) {
-                log.add("❌ Błąd: nie znaleziono wzorca zwierzęcia do rozmnażania.");
+                //log.add("❌ Błąd: nie znaleziono wzorca zwierzęcia do rozmnażania.");
                 continue;
             }
             for (int i = 0; i < pairs; i++) {

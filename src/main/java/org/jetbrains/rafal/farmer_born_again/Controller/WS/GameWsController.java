@@ -12,6 +12,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -44,12 +45,17 @@ public class GameWsController {
                         case 2 -> siloKey = "medium_quality";
                         default -> siloKey = "high_quality";
                     }
-                    System.out.printf("%s: %s\n", fed.getFeedLevel(), player.getSilo().get(siloKey));
+
+                    int oldFeed = fed.getFeedLevel() - 1;
+                    int newSiloValue = player.getSilo().getOrDefault(siloKey, 0);
+
+
                     action.setDescription(fed.isFed() && player.getSilo().get(siloKey) > 0
                             ? "✅ " + fed.getName() + " nakarmiony (" + (fed.getFeedLevel() - 1) + " → " + fed.getFeedLevel() + ")"
                             : "❌ Brak paszy na karmienie " + fed.getName());
                     action.setFeedLevel(fed.getFeedLevel());
                     fed.setFed(false);
+                    action.setExtra(Map.of("siloKey", siloKey, "siloValue", newSiloValue));
                 } else {
                     action.setDescription("❌ Nie znaleziono zwierzęcia o ID " + action.getTargetId());
                 }

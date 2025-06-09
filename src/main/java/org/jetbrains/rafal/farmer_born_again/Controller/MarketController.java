@@ -211,6 +211,46 @@ public class MarketController {
         return "game/shop";
     }
 
+    @PostMapping("/sell-product")
+    public String sellProduct(@RequestParam String type, HttpSession session, Model model) {
+        Player player = (Player) session.getAttribute("player");
+
+        Map<String, Integer> productToFeedMap = Map.of(
+                "egg", 2,
+                "wool", 4,
+                "milk", 6
+        );
+
+        Map<String, String> feedTypeMap = Map.of(
+                "egg", "low_quality",
+                "wool", "medium_quality",
+                "milk", "high_quality"
+        );
+
+        Optional<Product> productOpt = player.getProducts().stream()
+                .filter(p -> p.getName().equalsIgnoreCase(type) && p.getQuantity() > 0)
+                .findFirst();
+
+        if (productOpt.isPresent()) {
+            Product product = productOpt.get();
+
+            product.setQuantity(product.getQuantity() - 1);
+            if (product.getQuantity() <= 0) {
+                player.getProducts().remove(product);
+            }
+
+            String feedType = feedTypeMap.get(type);
+            int feedAmount = productToFeedMap.get(type);
+            player.getSilo().merge(feedType, feedAmount, Integer::sum);
+
+            model.addAttribute("message", "✅ Sprzedano " + type + " za " + feedAmount + " " + feedType.replace("_", " ") + " paszy.");
+        } else {
+            model.addAttribute("message", "❌ Brak dostępnego produktu: " + type);
+        }
+
+        return "game/shop";
+    }
+
 
     private record ExchangeRule(String source, int required) {}
     private record AnimalData(int reproductionChance, int foodRequirement, int sellPrice) {}
