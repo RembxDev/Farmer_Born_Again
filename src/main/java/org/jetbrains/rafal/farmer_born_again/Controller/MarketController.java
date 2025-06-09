@@ -44,12 +44,13 @@ public class MarketController {
 
         if (optional.isEmpty()) {
             model.addAttribute("message", "Nie masz tego produktu.");
-            return "game/shop";
+
         }
 
         Product product = optional.get();
         if (product.getQuantity() < quantity) {
             model.addAttribute("message", "Za mało produktu.");
+            model.addAttribute("player", player);
             return "game/shop";
         }
 
@@ -68,6 +69,7 @@ public class MarketController {
         player.getSilo().merge("low_quality", earned, Integer::sum);
 
         model.addAttribute("message", "Sprzedano za " + earned + " paszy niskiej jakości.");
+        model.addAttribute("player", player);
         return "game/shop";
     }
 
@@ -87,12 +89,14 @@ public class MarketController {
         String currency = costMap.get(type);
         if (currency == null) {
             model.addAttribute("message", "Nieznany typ paszy.");
+            model.addAttribute("player", player);
             return "game/shop";
         }
 
         int available = player.getSilo().getOrDefault(currency, 0);
         if (available < quantity * 2) {
             model.addAttribute("message", "Za mało paszy: " + currency);
+            model.addAttribute("player", player);
             return "game/shop";
         }
 
@@ -100,6 +104,7 @@ public class MarketController {
         player.getSilo().merge(type, quantity, Integer::sum);
 
         model.addAttribute("message", "Kupiono " + quantity + "x " + type + " za " + (quantity * 2) + " " + currency);
+        model.addAttribute("player", player);
         return "game/shop";
     }
 
@@ -129,6 +134,7 @@ public class MarketController {
 
         if (rule == null || data == null) {
             model.addAttribute("message", "Nieznana wymiana.");
+            model.addAttribute("player", player);
             return "game/shop";
         }
 
@@ -138,6 +144,7 @@ public class MarketController {
 
         if (count < rule.required) {
             model.addAttribute("message", "Za mało " + rule.source + " do wymiany.");
+            model.addAttribute("player", player);
             return "game/shop";
         }
 
@@ -162,6 +169,7 @@ public class MarketController {
         player.getAnimals().add(newAnimal);
 
         model.addAttribute("message", "Wymieniono na nowe zwierzę: " + type);
+        model.addAttribute("player", player);
         return "game/shop";
     }
 
@@ -182,6 +190,7 @@ public class MarketController {
         AnimalData data = animalData.get(type);
         if (data == null) {
             model.addAttribute("message", "Nieznane zwierzę.");
+            model.addAttribute("player", player);
             return "game/shop";
         }
 
@@ -191,6 +200,7 @@ public class MarketController {
 
         if (optional.isEmpty()) {
             model.addAttribute("message", "Nie masz takiego zwierzęcia.");
+            model.addAttribute("player", player);
             return "game/shop";
         }
 
@@ -208,6 +218,7 @@ public class MarketController {
         player.getSilo().merge(feedType, price, Integer::sum);
 
         model.addAttribute("message", "Sprzedano " + type + " za " + price + " (" + feedType + ")");
+        model.addAttribute("player", player);
         return "game/shop";
     }
 
@@ -250,6 +261,7 @@ public class MarketController {
             model.addAttribute("message", "❌ Brak dostępnego produktu: " + type);
         }
 
+        model.addAttribute("player", player);
         return "game/shop";
     }
 
