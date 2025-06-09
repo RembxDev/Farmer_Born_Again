@@ -47,7 +47,11 @@ public class MarketController {
 
         if (optional.isEmpty()) {
             model.addAttribute("message", "Nie masz tego produktu.");
-
+            HealingCostResult healingCostResult = calculateHealingCosts(player);
+            model.addAttribute("player", player);
+            model.addAttribute("sickAnimalCount", healingCostResult.sickAnimalCount());
+            model.addAttribute("healingCosts", healingCostResult.costs());
+            return "game/shop";
         }
 
         Product product = optional.get();

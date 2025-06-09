@@ -112,53 +112,37 @@ function markReady() {
     });
 }
 
-// ALERTY
-let alertQueue = [];
-let isAlertShowing = false;
-
-function showCustomAlert(message) {
-    alertQueue.push(message);
-    processAlertQueue();
-}
-
-function processAlertQueue() {
-    if (isAlertShowing || alertQueue.length === 0) return;
-
-    isAlertShowing = true;
-    const message = alertQueue.shift();
-
+// ALERT - jeden duży zbiorczy
+function showCombinedAlert(messages) {
     const alertBox = document.createElement('div');
     alertBox.classList.add('custom-alert');
+
+    const messageList = messages.map(msg => `<li>${msg}</li>`).join('');
+
     alertBox.innerHTML = `
-        <span class="alert-message">${message}</span>
+        <div style="text-align: left;">
+            <ul style="margin: 0; padding: 0 0 0 20px; font-size: 20px; line-height: 1.6;">
+                ${messageList}
+            </ul>
+        </div>
         <span class="alert-close">&times;</span>
     `;
 
     document.body.appendChild(alertBox);
 
-
     setTimeout(() => alertBox.classList.add('visible'), 10);
 
-
     alertBox.querySelector('.alert-close').addEventListener('click', () => {
-        closeAlert(alertBox);
+        alertBox.classList.remove('visible');
+        setTimeout(() => alertBox.remove(), 400);
     });
-
 
     setTimeout(() => {
         if (document.body.contains(alertBox)) {
-            closeAlert(alertBox);
+            alertBox.classList.remove('visible');
+            setTimeout(() => alertBox.remove(), 400);
         }
-    }, 3500);
-}
-
-function closeAlert(alertBox) {
-    alertBox.classList.remove('visible');
-    setTimeout(() => {
-        alertBox.remove();
-        isAlertShowing = false;
-        processAlertQueue();
-    }, 400);
+    }, 10000);
 }
 
 function toggleReadyButtonText(isFinished) {
@@ -180,7 +164,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (morningLogs) {
         try {
             const logs = JSON.parse(morningLogs);
-            logs.forEach(showCustomAlert);
+            if (logs.length > 0) {
+                showCombinedAlert(logs);
+            }
         } catch (err) {
             console.error("Błąd podczas parsowania morningLogs:", err);
         }

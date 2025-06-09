@@ -121,17 +121,18 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.95);
-            background: #4caf50;
+            background: #43a047; /* ciemniejszy zielony */
             color: #fff;
-            padding: 25px 50px 25px 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            font-size: 24px;
-            text-align: center;
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            font-size: 20px;
+            text-align: left;
             z-index: 1000;
             opacity: 0;
             transition: opacity 0.4s ease, transform 0.4s ease;
-            max-width: 80%;
+            width: 80%;
+            max-width: 600px;
         }
 
         .custom-alert.visible {
@@ -139,14 +140,34 @@
             transform: translate(-50%, -50%) scale(1);
         }
 
+        .custom-alert ul {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .custom-alert ul li {
+            background: #ffffff;
+            color: #333;
+            border-radius: 12px;
+            padding: 12px 18px;
+            margin-bottom: 10px;
+            font-size: 18px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         .custom-alert .alert-close {
             position: absolute;
-            top: 8px;
+            top: 10px;
             right: 14px;
-            font-size: 28px;
+            font-size: 26px;
             font-weight: bold;
             cursor: pointer;
-            color: #fff;
+            color: white;
+            transition: color 0.3s;
         }
         .custom-alert .alert-close:hover {
             color: #ddd;
