@@ -2,48 +2,56 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Rynek</title>
+    <title>🏪 Rynek</title>
     <style>
         body {
-            font-family: sans-serif;
-            background-color: #f8f8f8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f4f7f8;
+            color: #333;
         }
 
         h1 {
             text-align: center;
+            color: #2e7d32;
         }
 
         .market {
             display: flex;
             flex-wrap: wrap;
-            gap: 2rem;
+            gap: 20px;
             justify-content: center;
-            padding: 2rem;
+            padding: 20px;
         }
 
         .shop {
-            background-color: white;
+            background-color: #ffffff;
             border-radius: 12px;
-            padding: 1.5rem;
-            width: 300px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            width: 320px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .shop h2 {
             text-align: center;
+            color: #2e7d32;
         }
 
         form {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 10px;
         }
 
         button {
-            margin-top: 10px;
-            margin-right: 10px;
-            padding: 10px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4caf50;
+            color: white;
+            font-weight: bold;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
 
         button:hover {
@@ -54,6 +62,7 @@
             text-align: center;
             font-weight: bold;
             color: green;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -67,66 +76,69 @@
 
 <div class="market">
 
+    <!-- Powrót na farmę -->
     <div class="shop">
         <form method="get" th:action="@{/farm/}">
-            <button type="submit">Farma</button>
+            <button type="submit">🌾 Powrót na farmę</button>
         </form>
     </div>
+
     <!-- Sklep 1: Sprzedaż produktów -->
     <div class="shop">
-        <h2>Sklep 1: Produkty</h2>
-        <p>Sprzedaj produkty w zamian za paszę:</p>
+        <h2>🧺 Sprzedaż produktów</h2>
+        <p>Wymień produkty na paszę:</p>
         <form method="post" th:action="@{/market/sell-product}">
             <button name="type" value="egg"
-                    th:text="'Sprzedaj jajka (' + ${(T(java.lang.Math).round(2 * (1 + player.game.priceBonus / 100.0)) > 1 ? T(java.lang.Math).round(2 * (1 + player.game.priceBonus / 100.0)) : 1)} + ' Niska pasza)'">
+                    th:text="'🥚 Jajka (' + ${(T(java.lang.Math).round(2 * (1 + player.game.priceBonus / 100.0)))} + ' x Niska)'">
             </button>
             <button name="type" value="wool"
-                    th:text="'Sprzedaj wełnę (' + ${(T(java.lang.Math).round(4 * (1 + player.game.priceBonus / 100.0)) > 1 ? T(java.lang.Math).round(4 * (1 + player.game.priceBonus / 100.0)) : 1)} + ' Średnia pasza)'">
+                    th:text="'🧶 Wełna (' + ${(T(java.lang.Math).round(4 * (1 + player.game.priceBonus / 100.0)))} + ' x Średnia)'">
             </button>
             <button name="type" value="milk"
-                    th:text="'Sprzedaj mleko (' + ${(T(java.lang.Math).round(6 * (1 + player.game.priceBonus / 100.0)) > 1 ? T(java.lang.Math).round(6 * (1 + player.game.priceBonus / 100.0)) : 1)} + ' Wysoka pasza)'">
+                    th:text="'🥛 Mleko (' + ${(T(java.lang.Math).round(6 * (1 + player.game.priceBonus / 100.0)))} + ' x Wysoka)'">
             </button>
         </form>
     </div>
 
-    <!-- Sklep 2: Zamiana paszy -->
+    <!-- Sklep 2: Wymiana paszy -->
     <div class="shop">
-        <h2>Sklep 2: Pasza</h2>
-        <p>Zamień paszę na wyższej jakości:</p>
+        <h2>🌾 Wymiana paszy</h2>
+        <p>Ulepsz paszę na wyższą jakość:</p>
         <form method="post" th:action="@{/market/exchange}">
-            <button name="type" value="medium_quality">2 Niskiej → 1 Średnia</button>
-            <button name="type" value="high_quality">2 Średniej → 1 Wysoka</button>
+            <button name="type" value="medium_quality">2 x Niska ➔ 1 x Średnia</button>
+            <button name="type" value="high_quality">2 x Średnia ➔ 1 x Wysoka</button>
         </form>
     </div>
 
-    <!-- Sklep 3: Wymiana zwierząt -->
+    <!-- Sklep 3: Wymiana i sprzedaż zwierząt -->
     <div class="shop">
-        <h2>Sklep 3: Wymiana zwierząt</h2>
+        <h2>🐾 Zwierzęta</h2>
         <p>Wymień zwierzęta na lepsze:</p>
         <form method="post" th:action="@{/market/exchange}">
-            <button name="type" value="chicken">5 królików → 1 kura</button>
-            <button name="type" value="sheep">4 kury → 1 owca</button>
-            <button name="type" value="cow">4 owce → 1 krowa</button>
-            <button name="type" value="horse">3 krowy → 1 koń</button>
+            <button name="type" value="chicken">5 🐇 ➔ 1 🐔</button>
+            <button name="type" value="sheep">4 🐔 ➔ 1 🐑</button>
+            <button name="type" value="cow">4 🐑 ➔ 1 🐄</button>
+            <button name="type" value="horse">3 🐄 ➔ 1 🐎</button>
         </form>
 
         <hr>
+
         <p>Sprzedaj zwierzęta za paszę:</p>
         <form method="post" th:action="@{/market/sell-animal}">
             <button name="type" value="rabbit"
-                    th:text="'Sprzedaj królika (' + ${(T(java.lang.Math).round(1 * (1 + player.game.priceBonus / 100.0)) > 1 ? T(java.lang.Math).round(1 * (1 + player.game.priceBonus / 100.0)) : 1)} + ' Niska)'">
+                    th:text="'🐇 (' + ${(T(java.lang.Math).round(1 * (1 + player.game.priceBonus / 100.0)))} + ' x Niska)'">
             </button>
             <button name="type" value="chicken"
-                    th:text="'Sprzedaj kurę (' + ${(T(java.lang.Math).round(4 * (1 + player.game.priceBonus / 100.0)) > 1 ? T(java.lang.Math).round(4 * (1 + player.game.priceBonus / 100.0)) : 1)} + ' Niska)'">
+                    th:text="'🐔 (' + ${(T(java.lang.Math).round(4 * (1 + player.game.priceBonus / 100.0)))} + ' x Niska)'">
             </button>
             <button name="type" value="sheep"
-                    th:text="'Sprzedaj owcę (' + ${(T(java.lang.Math).round(8 * (1 + player.game.priceBonus / 100.0)) > 1 ? T(java.lang.Math).round(8 * (1 + player.game.priceBonus / 100.0)) : 1)} + ' Średnia)'">
+                    th:text="'🐑 (' + ${(T(java.lang.Math).round(8 * (1 + player.game.priceBonus / 100.0)))} + ' x Średnia)'">
             </button>
             <button name="type" value="cow"
-                    th:text="'Sprzedaj krowę (' + ${(T(java.lang.Math).round(25 * (1 + player.game.priceBonus / 100.0)) > 1 ? T(java.lang.Math).round(25 * (1 + player.game.priceBonus / 100.0)) : 1)} + ' Wysoka)'">
+                    th:text="'🐄 (' + ${(T(java.lang.Math).round(25 * (1 + player.game.priceBonus / 100.0)))} + ' x Wysoka)'">
             </button>
             <button name="type" value="horse"
-                    th:text="'Sprzedaj konia (' + ${(T(java.lang.Math).round(40 * (1 + player.game.priceBonus / 100.0)) > 1 ? T(java.lang.Math).round(40 * (1 + player.game.priceBonus / 100.0)) : 1)} + ' Wysoka)'">
+                    th:text="'🐎 (' + ${(T(java.lang.Math).round(40 * (1 + player.game.priceBonus / 100.0)))} + ' x Wysoka)'">
             </button>
         </form>
     </div>

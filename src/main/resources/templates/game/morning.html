@@ -1,42 +1,59 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Nowy Poranek</title>
+  <title>🌄 Poranek na farmie</title>
   <meta charset="UTF-8">
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 30px; background-color: #fafafa; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 20px;
+      background-color: #f4f7f8;
+      color: #333;
+      text-align: center;
+    }
+
+    h1 {
+      color: #2e7d32;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 18px;
+    }
 
     #log {
-      max-width: 600px;
+      max-width: 700px;
       margin: 20px auto;
       text-align: left;
       border: 1px solid #ccc;
-      padding: 10px;
-      background: #f3f3f3;
-      height: 200px;
+      padding: 15px;
+      background: #ffffff;
+      height: 220px;
       overflow-y: auto;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
     }
 
     .dice-container {
       display: flex;
       justify-content: center;
-      gap: 20px;
+      gap: 30px;
       margin: 20px 0;
     }
 
     .dice {
-      font-size: 50px;
-      padding: 20px;
-      border: 2px solid #333;
-      border-radius: 10px;
-      background-color: #fff;
-      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-      width: 80px;
-      height: 80px;
+      font-size: 60px;
+      padding: 30px;
+      border: 3px solid #2e7d32;
+      border-radius: 15px;
+      background-color: #ffffff;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+      width: 100px;
+      height: 100px;
       display: flex;
       align-items: center;
       justify-content: center;
-      animation: rollDice 0.5s infinite ease-in-out;
+      animation: rollDice 0.6s infinite ease-in-out;
     }
 
     @keyframes rollDice {
@@ -53,16 +70,18 @@
 
     .clock {
       margin: 30px auto;
-      border: 5px solid #333;
+      border: 5px solid #2e7d32;
       border-radius: 50%;
-      width: 150px;
-      height: 150px;
+      width: 160px;
+      height: 160px;
       position: relative;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+      background-color: #ffffff;
     }
 
     .hand {
       width: 50%;
-      height: 4px;
+      height: 5px;
       background: #45fdff;
       position: absolute;
       top: 50%;
@@ -70,17 +89,24 @@
       transform-origin: 0%;
       transform: rotate(-90deg);
       transition: transform 1s linear;
+      border-radius: 3px;
     }
 
     .center-dot {
-      width: 10px;
-      height: 10px;
-      background: #333;
+      width: 12px;
+      height: 12px;
+      background: #2e7d32;
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       border-radius: 50%;
+    }
+
+    .countdown {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 10px;
     }
   </style>
   <script src="/js/timer.js"></script>
@@ -103,7 +129,7 @@
   <div class="center-dot"></div>
 </div>
 
-<p>Powrót do gry za <span id="countdown">15</span> sekund</p>
+<p class="countdown">Powrót do gry za <span id="countdown">15</span> sekund</p>
 
 <script>
   const emojiMap = {

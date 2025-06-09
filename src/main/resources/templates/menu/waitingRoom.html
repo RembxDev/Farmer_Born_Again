@@ -6,36 +6,103 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        #playersList, #chatWindow {
-            border: 1px solid #ccc;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f0f0f;
+            color: #f0f0f0;
+            margin: 0;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #a3d9a5;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        ul#playersList {
+            list-style: none;
+            padding: 0;
+            margin: 0 auto 30px auto;
+            max-width: 400px;
+            background-color: #1a1a1a;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            padding: 20px;
+        }
+
+        ul#playersList li {
             padding: 10px;
-            background-color: #f9f9f9;
+            font-size: 18px;
+            border-bottom: 1px solid #333;
         }
+
+        ul#playersList li:last-child {
+            border-bottom: none;
+        }
+
         #chatWindow {
-            height: 200px;
-            overflow-y: scroll;
-            margin-bottom: 10px;
+            background-color: #1a1a1a;
+            border-radius: 12px;
+            padding: 20px;
+            height: 250px;
+            overflow-y: auto;
+            margin: 0 auto 15px auto;
+            max-width: 500px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
+
         input[type="text"] {
-            padding: 5px;
-            width: 300px;
+            padding: 10px;
+            width: 350px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: none;
+            background-color: #333;
+            color: #fff;
+            margin-top: 10px;
         }
+
+        input[type="text"]::placeholder {
+            color: #aaa;
+        }
+
         button {
-            padding: 8px 12px;
-            margin-right: 5px;
+            padding: 12px 25px;
+            font-size: 16px;
+            margin: 10px 5px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4caf50;
+            color: white;
+            font-weight: bold;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
-        h2, h3 { margin-top: 0; }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        form button {
+            background-color: #e53935;
+        }
+
+        form button:hover {
+            background-color: #d32f2f;
+        }
     </style>
-
-
 </head>
+
 <body>
 
-<h2>Poczekalnia</h2>
+<h2>🌾 Poczekalnia</h2>
+
 <p>Gracze aktualnie w poczekalni:</p>
+
 <ul id="playersList">
     <li th:each="p : ${players}"
         th:id="'player-' + ${p.name}"
@@ -44,25 +111,20 @@
     </li>
 </ul>
 
-
-
 <span id="playerName" th:text="${playerName}" style="display:none;"></span>
 
-<h3>Czat Poczekalni</h3>
+<h3>💬 Czat Poczekalni</h3>
 <div id="chatWindow"></div>
 
 <input type="text" id="chatInput" placeholder="Wpisz wiadomość" />
 <button onclick="sendChatMessage()">💬 Wyślij</button>
 
+<div style="margin-top: 20px;">
+    <button onclick="markReady()">✅ Start gry</button>
 
-<div style="margin-top: 15px;">
-
-    <button onclick="markReady()">Start</button>
-
-    <form action="/leave" method="post">
+    <form action="/leave" method="post" style="display: inline;">
         <button type="submit">🚪 Wyloguj</button>
     </form>
-
 </div>
 
 <script src="/js/waitingRoom.js"></script>

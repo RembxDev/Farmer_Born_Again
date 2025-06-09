@@ -4,28 +4,70 @@
     <title>Super Farmer - Main Menu</title>
     <meta charset="UTF-8">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 100px;
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #0f0f0f;
+            color: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
         }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: #a3d9a5;
+        }
+
         form {
-            margin-top: 20px;
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
         }
+
         input[type="text"] {
-            padding: 10px;
-            width: 250px;
+            padding: 12px 20px;
+            width: 300px;
             font-size: 16px;
+            border-radius: 8px;
+            border: none;
+            background-color: #333;
+            color: #fff;
         }
+
+        input[type="text"]::placeholder {
+            color: #aaa;
+        }
+
         button {
-            padding: 10px 20px;
+            padding: 12px 30px;
             font-size: 16px;
             cursor: pointer;
-            margin-left: 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4caf50;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s;
         }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
         .error {
-            color: red;
-            margin-top: 10px;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -33,17 +75,16 @@
 
 <h1>🌾 Witaj w Super Farmer! 🐮</h1>
 
-
 <div th:if="${error}" class="error">
     <p th:text="${error}"></p>
 </div>
 
-<div th:if="${param.error} == 'loggedOut'" style="color: red;">
-    <p>Sesja wygasła lub zostałes wylogowany. Zaloguj się ponownie.</p>
+<div th:if="${param.error} == 'loggedOut'" class="error">
+    <p>Sesja wygasła lub zostałeś wylogowany. Zaloguj się ponownie.</p>
 </div>
 
 <form action="/waiting" method="get">
-    <label for="playerName">Podaj nazwę gracza:</label><br><br>
+    <label for="playerName">Podaj nazwę gracza:</label>
     <input type="text" id="playerName" name="playerName" placeholder="np. FarmerRafał" required>
     <button type="submit">🚜 Do poczekalni</button>
 </form>

@@ -4,53 +4,69 @@
   <title>🌙 Noc na farmie</title>
   <meta charset="UTF-8">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 100px;
-      background-color: #1c1c1c;
-      color: white;
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #0f0f0f;
+      color: #f0f0f0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       overflow: hidden;
       position: relative;
+      text-align: center;
     }
+
     h1 {
       font-size: 36px;
+      margin-top: 50px;
+      color: #a8d5ba;
     }
+
     .event {
       margin-top: 40px;
       font-size: 24px;
+      color: #ffffff;
+      padding: 20px 30px;
+      background: #1a1a1a;
+      border-radius: 15px;
+      display: inline-block;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
     }
+
     .desc {
       font-size: 18px;
       color: #ccc;
+      margin-top: 10px;
     }
 
     .clock {
       margin: 50px auto;
-      border: 5px solid #ccc;
+      border: 5px solid #4caf50;
       border-radius: 50%;
-      width: 150px;
-      height: 150px;
+      width: 160px;
+      height: 160px;
       position: relative;
-      z-index: 2;
+      background-color: #1f1f1f;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
     }
 
     .hand {
       width: 50%;
-      height: 4px;
-      background: #f00;
+      height: 5px;
+      background: #ff5252;
       position: absolute;
       top: 50%;
       left: 50%;
       transform-origin: 0%;
       transform: rotate(-90deg);
       transition: transform 1s linear;
+      border-radius: 3px;
     }
 
     .center-dot {
-      width: 10px;
-      height: 10px;
-      background: #ccc;
+      width: 12px;
+      height: 12px;
+      background: #ffffff;
       position: absolute;
       top: 50%;
       left: 50%;
@@ -69,6 +85,13 @@
       z-index: 1;
       transition: opacity 1s linear;
     }
+
+    .countdown {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 10px;
+      color: #b3b3b3;
+    }
   </style>
   <script src="/js/timer.js"></script>
   <script>
@@ -83,9 +106,10 @@
 <div id="overlay"></div>
 
 <h1>🌙 Zapadła noc...</h1>
+
 <div class="event">
-  <strong th:text=${eventName}>[Nazwa eventu]</strong>
-  <div class="desc" th:text=${eventDescription}>[Opis eventu]</div>
+  <strong th:text="${eventName}">[Nazwa eventu]</strong>
+  <div class="desc" th:text="${eventDescription}">[Opis eventu]</div>
 </div>
 
 <div class="clock">
@@ -93,6 +117,7 @@
   <div class="center-dot"></div>
 </div>
 
-<p style="margin-top: 20px;">Przejście do poranka za <span id="countdown">10</span> sekund</p>
+<p class="countdown">Przejście do poranka za <span id="countdown">10</span> sekund</p>
+
 </body>
 </html>

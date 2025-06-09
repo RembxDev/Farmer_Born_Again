@@ -38,13 +38,26 @@ public class GameController {
             return "redirect:/?error=loggedOut";
         }
 
-
         Game game = player.getGame();
         game.setCurrentPhase(Game.Phase.DAY);
 
         List<Animal> animals = player.getAnimals();
+        if (animals == null) {
+            animals = List.of();
+        }
+
+
         Map<String, List<Animal>> groupedAnimals = animals.stream()
                 .collect(Collectors.groupingBy(Animal::getName));
+
+
+        Map<String, List<Long>> groupedAnimalIds = groupedAnimals.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().stream()
+                                .map(animal -> animal.getId().longValue())
+                                .toList()
+                ));
 
         long sickCount = animals.stream().filter(Animal::isSick).count();
         int percentage = animals.isEmpty() ? 0 : (int) ((double) sickCount * 100 / animals.size());
@@ -54,6 +67,7 @@ public class GameController {
         model.addAttribute("game", game);
         model.addAttribute("silo", player.getSilo());
         model.addAttribute("groupedAnimals", groupedAnimals);
+        model.addAttribute("groupedAnimalIds", groupedAnimalIds);
         model.addAttribute("sickPercentage", percentage);
         return "game/farm";
     }

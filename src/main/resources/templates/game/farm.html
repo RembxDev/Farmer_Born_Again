@@ -8,20 +8,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        #gameLog {
-            border: 1px solid #ccc;
-            height: 300px;
-            overflow-y: scroll;
-            padding: 10px;
-            background-color: #f9f9f9;
-        }
-        button {
-            margin-top: 10px;
-            margin-right: 10px;
-            padding: 10px;
-            cursor: pointer;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f4f7f8; color: #333; }
+        h1, h3 { color: #2e7d32; }
+        #gameLog { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; background-color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 8px; }
+        button { margin-top: 10px; margin-right: 10px; padding: 10px 15px; cursor: pointer; border: none; border-radius: 8px; background-color: #4caf50; color: white; font-weight: bold; transition: background-color 0.3s; }
+        button:hover { background-color: #45a049; }
+        ul { padding: 0; margin-bottom: 20px; }
+        li { list-style: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; border-bottom: 1px solid #ddd; background-color: #fff; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .animal-card { border: 1px solid #ddd; padding: 10px; border-radius: 10px; background-color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .product-card { border: 1px solid #ddd; padding: 10px; border-radius: 10px; background-color: #ffffff; min-width: 120px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .group-header { background: #eef; padding: 10px; border-radius: 8px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
@@ -32,9 +28,9 @@
 <p th:text="'🌟 Aktualny Event: ' + ${eventName}"></p>
 
 <h3>Silos paszy:</h3>
-<ul style="list-style: none; padding: 0; margin-bottom: 20px;">
-    <li th:each="feed : ${silo}" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 12px; border-bottom: 1px solid #ddd;">
-        <span style="font-size: 16px;">
+<ul>
+    <li th:each="feed : ${silo}">
+        <span>
             <span th:switch="${feed.getKey()}">
                 <span th:case="'grass'">🌿 Trawa</span>
                 <span th:case="'low_quality'">🥕 Pasza niskiej jakości</span>
@@ -47,44 +43,38 @@
     </li>
 </ul>
 
-
-
 <h3>Log sesji gry:</h3>
-<div id="gameLog">
-
-</div>
+<div id="gameLog"></div>
 
 <h3>Twoje zwierzęta:</h3>
-<div th:each="entry : ${groupedAnimals}" style="margin-bottom: 15px;">
-    <div th:attr="onclick='toggleAnimalGroup(\'' + ${entry.key} + '\')'"
-         style="cursor: pointer; background: #eef; padding: 10px; border-radius: 8px;">
-        <strong>🐾 <span th:text="${entry.key}">Typ</span></strong>
-        – 👥 <span th:text="${#lists.size(entry.value)}">0</span> szt.
-        – 🤒 <span th:text="${sickPercentage + '%'}">0%</span>
-        <button type="button" th:inline="javascript"
-                th:attr="onclick='feedMultipleAnimals([[${entry.value.^![id]}]])'">
+<div th:each="entry : ${groupedAnimals}">
+    <div class="group-header">
+        <div>
+            <button type="button" class="toggle-btn" th:attr="data-group-key=${entry.key}">🔽</button>
+            <strong>🐾 <span th:text="${entry.key}">Typ</span></strong> –
+            👥 <span th:text="${#lists.size(entry.value)}">0</span> szt. –
+            🤒 <span th:text="${sickPercentage + '%'}">0%</span>
+        </div>
+
+        <button type="button" class="feed-multiple-btn"
+                th:attr="data-animal-ids=${#strings.arrayJoin(groupedAnimalIds[entry.key], ',')}">
             🍽️ Nakarm wszystkie
         </button>
     </div>
 
-    <div th:attr="id='group-' + ${entry.key}"
-         style="display: none; margin-left: 20px; margin-top: 8px;">
-        <div th:each="animal : ${entry.value}"
-             style="border: 1px solid #ccc; padding: 8px; margin-top: 6px; border-radius: 8px;">
+    <div th:attr="id='group-' + ${entry.key}" style="display: none; margin-left: 20px; margin-top: 8px;">
+        <div th:each="animal : ${entry.value}" class="animal-card" style="margin-bottom: 8px;">
             🆔 <span th:text="${animal.id}">ID</span> –
             <span th:text="${animal.sick} ? '🤒 Chory' : '💪 Zdrowy'"></span> –
             <span th:attr="id='feedLevel-' + ${animal.id}" th:utext="${'🍗'.repeat(animal.feedLevel) + '▫️'.repeat(5 - animal.feedLevel)}"></span>
-            <button th:attr="onclick='feedAnimal(' + ${animal.id} + ')'" style="margin-left: 10px;">🍽️</button>
+            <button th:attr="data-animal-id=${animal.id}" class="feed-btn" style="margin-left: 10px;">🍽️</button>
         </div>
     </div>
 </div>
 
-
-
 <h3>Twoje produkty:</h3>
 <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
-    <div th:each="product : ${player.products}"
-         style="border: 1px solid #ccc; padding: 10px; border-radius: 10px; background-color: #f0f0f0; min-width: 120px;">
+    <div th:each="product : ${player.products}" class="product-card">
         <div style="font-size: 18px;">
             📦 <span th:text="${product.name}"></span> x<span th:text="${product.quantity}"></span>
         </div>
@@ -92,7 +82,6 @@
 </div>
 
 <div>
-
     <form action="/market" method="get" style="display:inline;">
         <button type="submit">🏪 Rynek</button>
     </form>
@@ -108,5 +97,30 @@
 </div>
 
 <script src="/js/gameSession.js"></script>
+
+<script>
+    document.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const key = btn.dataset.groupKey;
+            const groupDiv = document.getElementById('group-' + key);
+            if (groupDiv) groupDiv.style.display = groupDiv.style.display === 'none' ? 'block' : 'none';
+        });
+    });
+
+    document.querySelectorAll('.feed-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const animalId = btn.dataset.animalId;
+            feedAnimal(animalId);
+        });
+    });
+
+    document.querySelectorAll('.feed-multiple-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const ids = btn.dataset.animalIds.split(',').map(id => parseInt(id));
+            feedMultipleAnimals(ids);
+        });
+    });
+</script>
+
 </body>
 </html>
