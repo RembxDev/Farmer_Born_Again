@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -43,6 +44,15 @@ public class Player implements Serializable {
 
     @Transient
     private boolean finishedTurn;
+
+    public boolean hasAllAnimalTypes() {
+        Set<String> ownedAnimalTypes = this.getAnimals().stream()
+                .map(Animal::getName)
+                .collect(Collectors.toSet());
+
+        return ownedAnimalTypes.containsAll(Set.of("rabbit", "chicken", "sheep", "cow", "horse"));
+    }
+
 
     public Player(String name){
         this.name = name;

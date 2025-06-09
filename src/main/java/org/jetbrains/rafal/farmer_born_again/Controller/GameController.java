@@ -7,6 +7,7 @@ import org.jetbrains.rafal.farmer_born_again.Model.Player;
 import org.jetbrains.rafal.farmer_born_again.Service.GameService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,9 +25,11 @@ public class GameController {
 
 
     private final GameService gameService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public GameController(final GameService gameService) {
+    public GameController(final GameService gameService, final SimpMessagingTemplate messagingTemplate) {
         this.gameService = gameService;
+        this.messagingTemplate = messagingTemplate;
     }
 
 
@@ -44,6 +47,18 @@ public class GameController {
         List<Animal> animals = player.getAnimals();
         if (animals == null) {
             animals = List.of();
+        }
+
+        if (player.hasAllAnimalTypes()) {
+            game.setGameEnded(true);
+            game.setWinningPlayer(player);
+
+            messagingTemplate.convertAndSend("/topic/game/" + game.getId() + "/endTurn", Map.of(
+                    "type", "GAME_OVER",
+                    "winner", player.getName()
+            ));
+
+            return "redirect:/game/finished";
         }
 
 
@@ -130,7 +145,9 @@ public class GameController {
         if (type == null) return "Brak";
         return switch (type) {
             case MILA_POGODA -> "🌤️ Miła pogoda – zwierzęta łatwiej się rozmnażają!";
-            case DOBRE_ZBIORY -> "\uD83C\uDF3E Dobre zbiory – pasza urosła szybciej niż zwykle";
+            case ZLA_POGODA -> "\uD83C\uDF25\uFE0F Zła pogoda - zwierzęta ciężej rozmnażają!";
+            case SUSZA -> "\uD83E\uDD40 Ceny w ten dzień są podwyrzszone.";
+            case DOBRE_ZBIORY -> "\uD83C\uDF3E Dobre zbiory – pasza urosła szybciej niż zwykle.";
             case CHOROBA -> "🤒 Choroba – część zwierząt zachorowała.";
             case JARMARK -> "\uD83C\uDFEA Jarmark – Sklepy mają przeceny.";
             case SPOKOJNA_NOC -> "😴 Spokojna noc – nic się nie wydarzyło.";
@@ -142,6 +159,8 @@ public class GameController {
     public String getEventDescription(Game.NightEventType event) {
         return switch (event) {
             case MILA_POGODA -> "Zwierzęta mają większą szansę na rozmnożenie.";
+            case ZLA_POGODA -> "Zwierzęta mają mniejszą szanse na rozmnożenie.";
+            case SUSZA -> "Wyrzsze ceny w sklepie.";
             case DOBRE_ZBIORY -> "Każdy gracz otrzymuje dodatkową paszę.";
             case CHOROBA -> "Część zwierząt może zachorować.";
             case JARMARK -> "Produkty zyskują na wartości – idealny czas by je sprzedać!";
@@ -149,6 +168,21 @@ public class GameController {
             case INTENSYWNA_BURZA -> "Brza tak mocna, że nie przejść na rynek";
             default -> "Brak opisu.";
         };
+    }
+
+    @GetMapping("/game/finished")
+    public String showGameOverPage(HttpSession session, Model model) {
+        Player player = (Player) session.getAttribute("player");
+
+        if (player == null || player.getGame() == null || !player.getGame().isGameEnded()) {
+            return "redirect:/farm/";
+        }
+
+        String winnerName = player.getGame().getWinningPlayer() != null ?
+                player.getGame().getWinningPlayer().getName() : "Brak danych";
+
+        model.addAttribute("winner", winnerName);
+        return "game/finished";
     }
 
 

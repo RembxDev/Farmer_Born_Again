@@ -23,6 +23,10 @@ public class Game {
     private int BreedingBonus = 0 ;
     private int PriceBonus = 0;
     private boolean MarketLock = false;
+    @Transient
+    private Player WinningPlayer;
+    @Transient
+    private boolean GameEnded = false;
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
     private List<Player> players;

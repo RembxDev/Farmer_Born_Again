@@ -152,6 +152,14 @@ function toggleReadyButtonText(isFinished) {
         : "✅ Zakończ turę";
 }
 
+stompClient.subscribe('/topic/game/' + gameId + '/endTurn', function(message) {
+    const status = JSON.parse(message.body);
+    if (status.type === "GAME_OVER") {
+        alert("🏆 Gra zakończona! Wygrał " + status.winner);
+        window.location.href = "/game/finished";
+    }
+});
+
 // DOM READY
 document.addEventListener("DOMContentLoaded", () => {
     console.log("DOM załadowany");
