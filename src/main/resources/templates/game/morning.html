@@ -12,14 +12,8 @@
       text-align: center;
     }
 
-    h1 {
-      color: #2e7d32;
-      margin-bottom: 10px;
-    }
-
-    p {
-      font-size: 18px;
-    }
+    h1 { color: #2e7d32; margin-bottom: 10px; }
+    p { font-size: 18px; }
 
     #log {
       max-width: 700px;
@@ -64,9 +58,7 @@
       100% { transform: rotate(360deg); }
     }
 
-    .static {
-      animation: none !important;
-    }
+    .static { animation: none !important; }
 
     .clock {
       margin: 30px auto;
@@ -109,11 +101,15 @@
       margin-top: 10px;
     }
   </style>
+
   <script src="/js/timer.js"></script>
+  <script src="/js/audio.js"></script>
+
 </head>
 <body>
 
 <h1>🌄 Poranek na farmie</h1>
+<span id="gameId" th:text="${game.id}" style="display:none;"></span>
 <p>Trwa rzut kostkami i próba rozmnożenia zwierząt...</p>
 
 <div class="dice-container">
@@ -122,16 +118,17 @@
   <div class="dice" id="dice3">🎲</div>
 </div>
 
-<div id="log"></div>
-
 <div class="clock">
   <div class="hand" id="hand"></div>
   <div class="center-dot"></div>
 </div>
 
-<p class="countdown">Powrót do gry za <span id="countdown">15</span> sekund</p>
+<p class="countdown">Powrót do gry za <span id="countdown">6</span> sekund</p>
 
 <script>
+
+  const gameId = document.getElementById("gameId").textContent;
+
   const emojiMap = {
     "rabbit": "🐰",
     "chicken": "🐔",
@@ -141,42 +138,46 @@
     "wolf": "🐺"
   };
 
-  function appendToLog(message) {
-    const logDiv = document.getElementById('log');
-    const entry = document.createElement('div');
-    entry.textContent = message;
-    logDiv.appendChild(entry);
-    logDiv.scrollTop = logDiv.scrollHeight;
-  }
-
   function stopAnimationAndShowResults(diceResults) {
     for (let i = 0; i < 3; i++) {
       const dice = document.getElementById(`dice${i + 1}`);
       dice.classList.add('static');
       dice.textContent = emojiMap[diceResults[i]] || "❓";
+
+      audioManager.play("dice" + (i + 1));
+
+      if (diceResults[i]) {
+        setTimeout(() => {
+          audioManager.play(diceResults[i]);
+        }, 300);
+      }
     }
   }
 
   async function startMorning() {
+    audioManager.play("morning");
+
     setTimeout(() => {
       fetch('/farm/morning/process')
               .then(response => response.json())
               .then(data => {
                 if (data.diceResults && data.log) {
                   stopAnimationAndShowResults(data.diceResults);
-                  data.log.forEach(msg => appendToLog(msg));
+
+
+                  localStorage.setItem(`morningLogs_${gameId}`, JSON.stringify(data.log));
+
                   startCountdown({
-                    seconds: 15,
+                    seconds: 6,
                     onCompleteRedirect: "/farm/",
                     updateVisuals: true
                   });
                 } else {
-                  appendToLog("❌ Błąd: Brak wyników kostek.");
+                  console.error("Brak wyników kostek");
                 }
               })
               .catch(error => {
                 console.error("Błąd podczas przetwarzania poranka:", error);
-                appendToLog("❌ Wystąpił błąd podczas ładowania poranka.");
               });
     }, 4000);
   }

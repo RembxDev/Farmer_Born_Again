@@ -99,11 +99,15 @@ public class GameController {
     }
 
     @GetMapping("/morning")
-    public String morningPhase(HttpSession session) {
+    public String morningPhase(HttpSession session, Model model) {
         Player player = (Player) session.getAttribute("player");
         if (player == null) {
             return "redirect:/?error=loggedOut";
         }
+
+        Game game = player.getGame();
+        model.addAttribute("game", game);
+
         return "game/morning";
     }
 

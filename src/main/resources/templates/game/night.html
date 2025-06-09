@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>🌙 Noc na farmie</title>
   <meta charset="UTF-8">
+  <title>🌙 Noc na farmie</title>
   <style>
     html, body {
       height: 100%;
@@ -93,16 +93,25 @@
       color: #b3b3b3;
     }
   </style>
+
   <script src="/js/timer.js"></script>
+  <script src="/js/audio.js"></script>
+
   <script>
-    document.addEventListener('DOMContentLoaded', () => startCountdown({
-      seconds: 10,
-      onCompleteRedirect: "/farm/morning",
-      updateVisuals: true
-    }));
+    document.addEventListener('DOMContentLoaded', () => {
+
+      audioManager.play('night');
+
+      startCountdown({
+        seconds: 10,
+        onCompleteRedirect: "/farm/morning",
+        updateVisuals: true
+      });
+    });
   </script>
 </head>
 <body>
+
 <div id="overlay"></div>
 
 <h1>🌙 Zapadła noc...</h1>

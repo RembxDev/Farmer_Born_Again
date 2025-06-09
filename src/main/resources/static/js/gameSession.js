@@ -1,9 +1,15 @@
-
 let stompClient = null;
 let playerName = document.getElementById("playerName").textContent;
 let gameId = document.getElementById("gameId").textContent;
 
 function connectGame() {
+
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('morningLogs_') && !key.endsWith(gameId)) {
+            localStorage.removeItem(key);
+        }
+    });
+
     const socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function(frame) {
@@ -13,7 +19,6 @@ function connectGame() {
             const event = JSON.parse(message.body);
             console.log("Odebrano komunikat z gry:", event);
             addGameLog(event.description);
-
 
             if (event.action === "FEED_ANIMAL" && event.feedLevel !== undefined && event.targetId !== undefined) {
                 const feedSpan = document.getElementById("feedLevel-" + event.targetId);
@@ -37,7 +42,6 @@ function connectGame() {
                     turnStatus.textContent = event.description;
                 }
 
-
                 if (event.player === playerName) {
                     const btn = document.getElementById("readyButton");
                     const currentlyFinished = btn.textContent.includes("Cofnij");
@@ -46,18 +50,16 @@ function connectGame() {
             }
         });
 
-
-
-        stompClient.subscribe('/topic/game/'+ gameId + '/endTurn', function(message) {
+        stompClient.subscribe('/topic/game/' + gameId + '/endTurn', function(message) {
             const status = JSON.parse(message.body);
             if (status.type === "NIGHT_TIME") {
-                console.log("Zapada Noc!...");
+                console.log("Zapada Noc!");
                 window.location.href = "/farm/night";
             } else if (status.type === "NEW_MORNING") {
-                console.log("Wstaje Słońce!...");
+                console.log("Wstaje Słońce!");
                 window.location.href = "/farm/morning";
             } else if (status.type === "DAY_TIME") {
-                console.log("Można zacząć Dzień!...");
+                console.log("Można zacząć Dzień!");
                 window.location.href = "/farm/";
             }
         });
@@ -103,24 +105,87 @@ function markReady() {
         method: "POST"
     }).then(res => {
         if (!res.ok) {
-            alert("Błąd: nie udało się oznaczyć zakonczyć tury");
+            alert("Błąd: nie udało się zakończyć tury");
         } else {
-            console.log("Zakończono Ture.");
+            console.log("Zakończono turę.");
         }
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("Ładowanie strony, nawiązywanie połączenia z sesją gry...");
-    connectGame();
-});
+// ALERTY
+let alertQueue = [];
+let isAlertShowing = false;
+
+function showCustomAlert(message) {
+    alertQueue.push(message);
+    processAlertQueue();
+}
+
+function processAlertQueue() {
+    if (isAlertShowing || alertQueue.length === 0) return;
+
+    isAlertShowing = true;
+    const message = alertQueue.shift();
+
+    const alertBox = document.createElement('div');
+    alertBox.classList.add('custom-alert');
+    alertBox.innerHTML = `
+        <span class="alert-message">${message}</span>
+        <span class="alert-close">&times;</span>
+    `;
+
+    document.body.appendChild(alertBox);
+
+
+    setTimeout(() => alertBox.classList.add('visible'), 10);
+
+
+    alertBox.querySelector('.alert-close').addEventListener('click', () => {
+        closeAlert(alertBox);
+    });
+
+
+    setTimeout(() => {
+        if (document.body.contains(alertBox)) {
+            closeAlert(alertBox);
+        }
+    }, 3500);
+}
+
+function closeAlert(alertBox) {
+    alertBox.classList.remove('visible');
+    setTimeout(() => {
+        alertBox.remove();
+        isAlertShowing = false;
+        processAlertQueue();
+    }, 400);
+}
 
 function toggleReadyButtonText(isFinished) {
     const btn = document.getElementById("readyButton");
-    if (isFinished) {
-        btn.textContent = "⬅️ Cofnij zakończenie tury";
-    } else {
-        btn.textContent = "✅ Zakończ turę";
-    }
+    btn.textContent = isFinished
+        ? "⬅️ Cofnij zakończenie tury"
+        : "✅ Zakończ turę";
 }
 
+// DOM READY
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("DOM załadowany");
+    console.log("gameId:", gameId);
+
+    const key = `morningLogs_${gameId}`;
+    const morningLogs = localStorage.getItem(key);
+    console.log("morningLogs content:", morningLogs);
+
+    if (morningLogs) {
+        try {
+            const logs = JSON.parse(morningLogs);
+            logs.forEach(showCustomAlert);
+        } catch (err) {
+            console.error("Błąd podczas parsowania morningLogs:", err);
+        }
+        localStorage.removeItem(key);
+    }
+
+    connectGame();
+});
