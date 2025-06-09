@@ -104,15 +104,15 @@
     <div class="shop">
         <h2>🌾 Wymiana paszy</h2>
         <p>Ulepsz paszę na wyższą jakość:</p>
-        <form method="post" th:action="@{/market/sell}">
+        <form method="post" th:action="@{/market/buy-feed}">
             <button name="type" value="medium_quality">2 x Niska ➔ 1 x Średnia</button>
             <button name="type" value="high_quality">2 x Średnia ➔ 1 x Wysoka</button>
         </form>
     </div>
 
-    <!-- Sklep 3: Wymiana i sprzedaż zwierząt -->
+    <!-- Sklep 3: Wymiana zwierząt -->
     <div class="shop">
-        <h2>🐾 Zwierzęta</h2>
+        <h2>🐾 Wymiana Zwaierząt</h2>
         <p>Wymień zwierzęta na lepsze:</p>
         <form method="post" th:action="@{/market/exchange}">
             <button name="type" value="chicken">5 🐇 ➔ 1 🐔</button>
@@ -120,9 +120,11 @@
             <button name="type" value="cow">4 🐑 ➔ 1 🐄</button>
             <button name="type" value="horse">3 🐄 ➔ 1 🐎</button>
         </form>
+    </div>
 
-        <hr>
-
+    <!-- Sklep 4: Sprzedaż zwierząt -->
+    <div class="shop">
+        <h2>🐾 Sprzedaż Zwierzęta</h2>
         <p>Sprzedaj zwierzęta za paszę:</p>
         <form method="post" th:action="@{/market/sell-animal}">
             <button name="type" value="rabbit"
@@ -139,6 +141,24 @@
             </button>
             <button name="type" value="horse"
                     th:text="'🐎 (' + ${(T(java.lang.Math).round(40 * (1 + player.getGame().getPriceBonus() / 100.0)))} + ' x Wysoka)'">
+            </button>
+        </form>
+    </div>
+
+    <!-- Sklep 5: Kupno psów -->
+    <div class="shop">
+        <h2>🐶 Schronisko</h2>
+        <p>Kup psy za paszę:</p>
+        <form method="post" th:action="@{/market/buy-dog}">
+            <button name="type" value="small_dog"
+                    th:disabled="${player.isSmallDog()}"
+                    th:text="'🐕 Mały pies (10 x Wysoka)'"
+                    th:class="${player.isSmallDog()} ? 'disabled' : ''">
+            </button>
+            <button name="type" value="big_dog"
+                    th:disabled="${player.isBigDog()}"
+                    th:text="'🐕‍🦺 Duży pies (20 x Wysoka)'"
+                    th:class="${player.isBigDog()} ? 'disabled' : ''">
             </button>
         </form>
     </div>

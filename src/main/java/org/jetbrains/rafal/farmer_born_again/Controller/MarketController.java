@@ -265,6 +265,48 @@ public class MarketController {
         return "game/shop";
     }
 
+    @PostMapping("/buy-dog")
+    public String buyDog(@RequestParam String type, HttpSession session, Model model) {
+        Player player = (Player) session.getAttribute("player");
+
+        Map<String, DogData> dogData = Map.of(
+                "small_dog", new DogData(10, "Mały pies"),
+                "big_dog", new DogData(20, "Duży pies")
+        );
+
+        DogData data = dogData.get(type);
+        if (data == null) {
+            model.addAttribute("message", "❌ Nieznany typ psa.");
+            model.addAttribute("player", player);
+            return "game/shop";
+        }
+
+        boolean alreadyOwned = ("small_dog".equals(type) && player.isSmallDog()) || ("big_dog".equals(type) && player.isBigDog());
+        if (alreadyOwned) {
+            model.addAttribute("message", "❌ Już posiadasz " + data.name + "!");
+            model.addAttribute("player", player);
+            return "game/shop";
+        }
+
+        int highQualityFeed = player.getSilo().getOrDefault("high_quality", 0);
+        if (highQualityFeed < data.cost) {
+            model.addAttribute("message", "❌ Za mało paszy wysokiej jakości.");
+            model.addAttribute("player", player);
+            return "game/shop";
+        }
+
+        player.getSilo().put("high_quality", highQualityFeed - data.cost);
+        if ("small_dog".equals(type)) {
+            player.setSmallDog(true);
+        } else {
+            player.setBigDog(true);
+        }
+
+        model.addAttribute("message", "✅ Zakupiono " + data.name + " za " + data.cost + " paszy wysokiej jakości!");
+        model.addAttribute("player", player);
+        return "game/shop";
+    }
+
     private int applyPriceBonus(int basePrice, int bonusPercent) {
         int modifiedPrice = (int) Math.round(basePrice * (1 + bonusPercent / 100.0));
         return Math.max(1, modifiedPrice);
@@ -272,4 +314,5 @@ public class MarketController {
 
     private record ExchangeRule(String source, int required) {}
     private record AnimalData(int reproductionChance, int foodRequirement, int sellPrice) {}
+    private record DogData(int cost, String name) {}
 }
