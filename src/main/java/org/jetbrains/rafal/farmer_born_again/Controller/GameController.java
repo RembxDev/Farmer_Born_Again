@@ -126,9 +126,11 @@ public class GameController {
         if (type == null) return "Brak";
         return switch (type) {
             case MILA_POGODA -> "🌤️ Miła pogoda – zwierzęta łatwiej się rozmnażają!";
+            case DOBRE_ZBIORY -> "\uD83C\uDF3E Dobre zbiory – pasza urosła szybciej niż zwykle";
             case CHOROBA -> "🤒 Choroba – część zwierząt zachorowała.";
+            case JARMARK -> "\uD83C\uDFEA Jarmark – Sklepy mają przeceny.";
             case SPOKOJNA_NOC -> "😴 Spokojna noc – nic się nie wydarzyło.";
-
+            case INTENSYWNA_BURZA -> "\uD83C\uDF29\uFE0F Burza Zaczęło grzmić";
             default -> type.toString();
         };
     }
@@ -138,9 +140,9 @@ public class GameController {
             case MILA_POGODA -> "Zwierzęta mają większą szansę na rozmnożenie.";
             case DOBRE_ZBIORY -> "Każdy gracz otrzymuje dodatkową paszę.";
             case CHOROBA -> "Część zwierząt może zachorować.";
-            case JARMARK -> "Produkty zyskują na wartości – idealny czas na sprzedaż!";
+            case JARMARK -> "Produkty zyskują na wartości – idealny czas by je sprzedać!";
             case SPOKOJNA_NOC -> "To była spokojna noc – nic się nie wydarzyło.";
-
+            case INTENSYWNA_BURZA -> "Brza tak mocna, że nie przejść na rynek";
             default -> "Brak opisu.";
         };
     }

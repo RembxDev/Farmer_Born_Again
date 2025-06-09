@@ -174,6 +174,10 @@ public class GameService {
                 p.setFinishedTurn(false);
             }
 
+            game.setBreedingBonus(0);
+            game.setPriceBonus(0);
+            game.setMarketLock(false);
+
             triggerNightEvent(game);
 
             messagingTemplate.convertAndSend(
@@ -259,7 +263,7 @@ public class GameService {
             diceCounts.put(rolledType, diceCounts.getOrDefault(rolledType, 0) + 1);
         }
 
-        if (diceCounts.containsKey("fox")) {
+        if (diceCounts.containsKey("fox") && player.getGame().getBreedingBonus()==0) {
             log.add("🦊 Lis zakradł się na farmę!");
             double foxChance = player.isSmallDog() ? 5 : 90;
             log.add("🛡️ Szansa na zjedzenie królika i kury: " + foxChance + "%");
@@ -276,7 +280,7 @@ public class GameService {
             }
         }
 
-        if (diceCounts.containsKey("wolf")) {
+        if (diceCounts.containsKey("wolf") && player.getGame().getBreedingBonus()==0) {
             log.add("🐺 Wilk zakradł się na farmę!");
             double wolfChance = player.isBigDog() ? 5 : 90;
             log.add("🛡️ Szansa na zjedzenie owcy i krowy: " + wolfChance + "%");
@@ -302,7 +306,11 @@ public class GameService {
             int total = (int) validCount + diceCounts.get(type);
             int pairs = total / 2;
 
-            if (pairs == 0 || type.equals("fox") || type.equals("wolf")) {
+            if(type.equals("fox") || type.equals("wolf")){
+                continue;
+            }
+
+            if (pairs == 0) {
                 log.add("⚠️ Za mało zdrowych i najedzonych " + type + " do rozmnażania.");
                 continue;
             }
@@ -313,11 +321,10 @@ public class GameService {
                     .orElseGet(() -> animalService.getBaseAnimal(type));
 
             if (template == null) {
-                //log.add("❌ Błąd: nie znaleziono wzorca zwierzęcia do rozmnażania.");
                 continue;
             }
             for (int i = 0; i < pairs; i++) {
-                if (rand.nextInt(100) < template.getReproductionChance()) {
+                if (rand.nextInt(100) < (template.getReproductionChance()+player.getGame().getBreedingBonus())) {
                     Animal baby = animalService.createAnimal(
                             template.getName(),
                             template.getReproductionChance(),
