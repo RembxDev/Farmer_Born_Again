@@ -6,17 +6,11 @@ import org.jetbrains.rafal.farmer_born_again.Model.Animal;
 import org.jetbrains.rafal.farmer_born_again.Model.Player;
 import org.jetbrains.rafal.farmer_born_again.Model.Product;
 import org.jetbrains.rafal.farmer_born_again.Service.AnimalService;
-import org.jetbrains.rafal.farmer_born_again.Service.GameService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 @RequestMapping("/market")
@@ -65,7 +59,11 @@ public class MarketController {
                 "milk", 6
         );
 
-        int earned = priceMap.getOrDefault(productName.toLowerCase(), 1) * quantity;
+        int basePrice = priceMap.getOrDefault(productName.toLowerCase(), 1);
+        int bonus = player.getGame().getPriceBonus();
+        int unitPrice = applyPriceBonus(basePrice, bonus);
+        int earned = unitPrice * quantity;
+
         product.setQuantity(product.getQuantity() - quantity);
         player.getSilo().merge("low_quality", earned, Integer::sum);
 
@@ -205,9 +203,11 @@ public class MarketController {
             default -> "low_quality";
         };
 
-        player.getSilo().merge(feedType, data.sellPrice(), Integer::sum);
+        int bonus = player.getGame().getPriceBonus();
+        int price = applyPriceBonus(data.sellPrice(), bonus);
+        player.getSilo().merge(feedType, price, Integer::sum);
 
-        model.addAttribute("message", "Sprzedano " + type + " za " + data.sellPrice() + " (" + feedType + ")");
+        model.addAttribute("message", "Sprzedano " + type + " za " + price + " (" + feedType + ")");
         return "game/shop";
     }
 
@@ -233,17 +233,19 @@ public class MarketController {
 
         if (productOpt.isPresent()) {
             Product product = productOpt.get();
-
             product.setQuantity(product.getQuantity() - 1);
             if (product.getQuantity() <= 0) {
                 player.getProducts().remove(product);
             }
 
-            String feedType = feedTypeMap.get(type);
-            int feedAmount = productToFeedMap.get(type);
-            player.getSilo().merge(feedType, feedAmount, Integer::sum);
+            int base = productToFeedMap.get(type);
+            int bonus = player.getGame().getPriceBonus();
+            int modifiedAmount = applyPriceBonus(base, bonus);
 
-            model.addAttribute("message", "✅ Sprzedano " + type + " za " + feedAmount + " " + feedType.replace("_", " ") + " paszy.");
+            String feedType = feedTypeMap.get(type);
+            player.getSilo().merge(feedType, modifiedAmount, Integer::sum);
+
+            model.addAttribute("message", "✅ Sprzedano " + type + " za " + modifiedAmount + " " + feedType.replace("_", " ") + " paszy.");
         } else {
             model.addAttribute("message", "❌ Brak dostępnego produktu: " + type);
         }
@@ -251,9 +253,11 @@ public class MarketController {
         return "game/shop";
     }
 
+    private int applyPriceBonus(int basePrice, int bonusPercent) {
+        int modifiedPrice = (int) Math.round(basePrice * (1 + bonusPercent / 100.0));
+        return Math.max(1, modifiedPrice);
+    }
 
     private record ExchangeRule(String source, int required) {}
     private record AnimalData(int reproductionChance, int foodRequirement, int sellPrice) {}
-
-
 }

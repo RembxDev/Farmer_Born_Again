@@ -20,6 +20,8 @@ public class Game {
     @Enumerated(EnumType.STRING)
     private NightEventType currentEvent;
     private boolean started;
+    private int BreedingBonus = 0 ;
+    private int PriceBonus = 0;
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
     private List<Player> players;
@@ -42,14 +44,6 @@ public class Game {
     public enum NightEventType {
         SPOKOJNA_NOC, DOBRE_ZBIORY, MILA_POGODA, POPYT_NA_PRODUKT, JARMARK, WYPRZEDAZ,
         CHOROBA, INTENSYWNA_BURZA, SUSZA, ZLA_POGODA
-    }
-
-    public void setBreedingBonus(int bonus){
-
-    }
-
-    public void setPriceBonus(int bonus){
-
     }
 
 }

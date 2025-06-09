@@ -228,6 +228,7 @@ public class GameService {
         List<String> diceResults = new ArrayList<>();
 
         generateAnimalProducts(player, log);
+        generateGrass(player);
 
         List<Animal> playerAnimals = player.getAnimals();
 
@@ -337,6 +338,12 @@ public class GameService {
                 "log", log,
                 "diceResults", diceResults
         );
+    }
+
+    private void generateGrass(Player player) {
+        Map<String, Integer> Silo = player.getSilo();
+        Silo.compute("grass", (k, GrassCount) -> (int) (GrassCount * 1.5));
+
     }
 
     public void triggerNightEvent(Game game) {
